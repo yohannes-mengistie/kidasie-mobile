@@ -1,4 +1,4 @@
-package com.example.orthodox_liturgy
+package com.yohannes.kidasie
 
 import io.flutter.embedding.android.FlutterActivity
 
