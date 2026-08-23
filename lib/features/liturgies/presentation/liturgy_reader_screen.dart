@@ -54,8 +54,15 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
     );
 
     _pageController = PageController();
-    _viewModel.loadContent();
+    unawaited(_loadContentAndSynchronize());
     unawaited(_loadPreferences());
+  }
+
+  Future<void> _loadContentAndSynchronize() async {
+    await _viewModel.loadContent();
+    if (!mounted) return;
+
+    await _viewModel.refreshSilently();
   }
 
   Future<void> _loadPreferences() async {

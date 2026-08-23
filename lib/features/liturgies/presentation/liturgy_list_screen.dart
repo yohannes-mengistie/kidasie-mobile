@@ -43,7 +43,14 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
   void initState() {
     super.initState();
     _viewModel = LiturgyListViewModel(repository: widget.repository);
-    _viewModel.loadLiturgies();
+    unawaited(_loadAndSynchronize());
+  }
+
+  Future<void> _loadAndSynchronize() async {
+    await _viewModel.loadLiturgies();
+    if (!mounted) return;
+
+    await _viewModel.synchronizeContent();
   }
 
   @override
@@ -135,7 +142,7 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
         }
 
         return RefreshIndicator(
-          onRefresh: () => _viewModel.loadLiturgies(refresh: true),
+          onRefresh: _viewModel.synchronizeContent,
           child: ListView.separated(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             physics: const AlwaysScrollableScrollPhysics(),

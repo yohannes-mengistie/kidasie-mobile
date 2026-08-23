@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -50,10 +51,9 @@ final class LiturgyApiService {
   }
 
   Future<Map<String, dynamic>> _getJson(Uri uri) async {
-    final response = await _client.get(
-      uri,
-      headers: const {'Content-Type': 'application/json'},
-    );
+    final response = await _client
+        .get(uri, headers: const {'Content-Type': 'application/json'})
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
       throw LiturgyApiException(

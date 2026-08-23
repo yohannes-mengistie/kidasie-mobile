@@ -36,6 +36,37 @@ final class LiturgyRepository {
     }
   }
 
+  Future<List<Liturgy>> synchronizeContent() async {
+    final remoteLiturgies = await _apiService.fetchLiturgies();
+    await _localDataSource.writeLiturgies(remoteLiturgies);
+
+    for (final remoteLiturgy in remoteLiturgies) {
+      final localContent = await _localDataSource.readContent(
+        remoteLiturgy.slug,
+      );
+      final localVersion = localContent?.liturgy.contentVersion ?? -1;
+
+      if (localVersion >= remoteLiturgy.contentVersion) {
+        continue;
+      }
+
+      try {
+        final remoteContent = await _apiService.fetchLiturgyContent(
+          remoteLiturgy.slug,
+        );
+        if (remoteContent.liturgy.contentVersion >=
+            remoteLiturgy.contentVersion) {
+          await _localDataSource.writeContent(remoteContent);
+        }
+      } catch (_) {
+        // Keep the offline copy and retry this liturgy on the next sync.
+      }
+    }
+
+    final merged = await _localDataSource.readLiturgies();
+    return merged.isEmpty ? remoteLiturgies : merged;
+  }
+
   Future<LiturgyContent> getLiturgyContent(
     String slug, {
     bool refresh = false,

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../data/liturgy_repository.dart';
 import '../domain/liturgy.dart';
 
@@ -12,6 +13,8 @@ final class LiturgyListViewModel extends ChangeNotifier {
   LiturgyListStatus _status = LiturgyListStatus.initial;
   List<Liturgy> _liturgies = [];
   String? _errorMessage;
+  bool _isSynchronizing = false;
+  bool _isDisposed = false;
 
   LiturgyListStatus get status => _status;
   List<Liturgy> get liturgies => _liturgies;
@@ -44,20 +47,53 @@ final class LiturgyListViewModel extends ChangeNotifier {
     return sorted;
   }
 
-  Future<void> loadLiturgies({bool refresh = false}) async {
-    if (LiturgyListStatus.loading == _status) return;
+  Future<void> loadLiturgies() async {
+    if (_status == LiturgyListStatus.loading) return;
+
     _status = LiturgyListStatus.loading;
     _errorMessage = null;
-    notifyListeners();
+    _notifyListeners();
+
     try {
-      final liturgies = await _repository.getLiturgies(refresh: refresh);
+      final liturgies = await _repository.getLiturgies();
       _liturgies = List.unmodifiable(_sortLiturgies(liturgies));
       _status = LiturgyListStatus.success;
-    } catch (e) {
-      _errorMessage = e.toString();
+    } catch (error) {
+      _errorMessage = error.toString();
       _status = LiturgyListStatus.failure;
     }
 
-    notifyListeners();
+    _notifyListeners();
+  }
+
+  Future<void> synchronizeContent() async {
+    if (_isSynchronizing) return;
+    _isSynchronizing = true;
+
+    try {
+      final liturgies = await _repository.synchronizeContent();
+      if (liturgies.isNotEmpty) {
+        _liturgies = List.unmodifiable(_sortLiturgies(liturgies));
+        _status = LiturgyListStatus.success;
+        _errorMessage = null;
+        _notifyListeners();
+      }
+    } catch (_) {
+      // Synchronization is best-effort; keep the current offline catalog.
+    } finally {
+      _isSynchronizing = false;
+    }
+  }
+
+  void _notifyListeners() {
+    if (!_isDisposed) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }

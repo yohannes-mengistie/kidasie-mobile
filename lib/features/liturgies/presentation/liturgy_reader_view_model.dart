@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import '../data/liturgy_repository.dart';
 import '../domain/liturgy_content.dart';
 
@@ -17,6 +18,8 @@ final class LiturgyReaderViewModel extends ChangeNotifier {
   LiturgyReaderStatus _status = LiturgyReaderStatus.initial;
   LiturgyContent? _content;
   String? _errorMessage;
+  bool _isRefreshingSilently = false;
+  bool _isDisposed = false;
 
   LiturgyReaderStatus get status => _status;
   LiturgyContent? get content => _content;
@@ -29,7 +32,7 @@ final class LiturgyReaderViewModel extends ChangeNotifier {
 
     _status = LiturgyReaderStatus.loading;
     _errorMessage = null;
-    notifyListeners();
+    _notifyListeners();
 
     try {
       _content = await _repository.getLiturgyContent(_slug, refresh: refresh);
@@ -39,6 +42,36 @@ final class LiturgyReaderViewModel extends ChangeNotifier {
       _status = LiturgyReaderStatus.failure;
     }
 
-    notifyListeners();
+    _notifyListeners();
+  }
+
+  Future<void> refreshSilently() async {
+    if (_isRefreshingSilently || _status == LiturgyReaderStatus.loading) {
+      return;
+    }
+    _isRefreshingSilently = true;
+
+    try {
+      _content = await _repository.getLiturgyContent(_slug, refresh: true);
+      _status = LiturgyReaderStatus.success;
+      _errorMessage = null;
+      _notifyListeners();
+    } catch (_) {
+      // Keep displaying the available offline content.
+    } finally {
+      _isRefreshingSilently = false;
+    }
+  }
+
+  void _notifyListeners() {
+    if (!_isDisposed) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }
