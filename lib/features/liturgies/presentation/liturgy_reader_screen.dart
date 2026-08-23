@@ -29,10 +29,12 @@ class LiturgyReaderScreen extends StatefulWidget {
 
 class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   late final LiturgyReaderViewModel _viewModel;
+  late final PageController _pageController;
 
   ReaderLanguage _selectedLanguage = ReaderLanguage.all;
   double _textScale = 1;
   bool _highlightSacredNames = true;
+  int _currentPageIndex = 0;
 
   @override
   void initState() {
@@ -43,6 +45,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
       slug: widget.liturgy.slug,
     );
 
+    _pageController = PageController();
     _viewModel.loadContent();
     unawaited(_loadPreferences());
   }
@@ -68,6 +71,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   @override
   void dispose() {
     _viewModel.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -152,6 +156,11 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
             },
           ),
           IconButton(
+            tooltip: 'ይዘቱን አድስ',
+            onPressed: () => _viewModel.loadContent(refresh: true),
+            icon: const Icon(Icons.sync_rounded),
+          ),
+          IconButton(
             tooltip: 'ይህን ቅዳሴ ያጋሩ',
             onPressed: () => AppShareService.shareLiturgy(widget.liturgy),
             icon: const Icon(Icons.ios_share_rounded),
@@ -190,34 +199,289 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   }
 
   Widget _buildContent(LiturgyContent content) {
-    final items = <Object>[];
+    final pages = _groupIntoReaderPages(content);
 
-    for (final section in content.sections) {
-      items.add(section);
-      items.addAll(section.verses);
+    if (pages.isEmpty) {
+      return _buildEmpty();
     }
 
-    return RefreshIndicator(
-      onRefresh: () => _viewModel.loadContent(refresh: true),
-      child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
+    final selectedIndex = _currentPageIndex < pages.length
+        ? _currentPageIndex
+        : pages.length - 1;
 
-          if (item is LiturgySection) {
-            return _buildSectionHeader(item);
-          }
+    if (selectedIndex != _currentPageIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
 
-          if (item is Verse) {
-            return _buildVerse(item);
-          }
+        _pageController.jumpToPage(selectedIndex);
+        setState(() {
+          _currentPageIndex = selectedIndex;
+        });
+      });
+    }
 
-          return const SizedBox.shrink();
-        },
+    return Column(
+      children: [
+        _buildPagePicker(pages, selectedIndex),
+        Expanded(
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: pages.length,
+            physics: const PageScrollPhysics(),
+            onPageChanged: (index) {
+              setState(() {
+                _currentPageIndex = index;
+              });
+            },
+            itemBuilder: (context, index) {
+              return _buildBookPageTransition(page: pages[index], index: index);
+            },
+          ),
+        ),
+        _buildPageFooter(pages, selectedIndex),
+      ],
+    );
+  }
+
+  List<_ReaderPage> _groupIntoReaderPages(LiturgyContent content) {
+    final pages = <_ReaderPage>[];
+
+    for (final section in content.sections) {
+      _ReaderPage? currentPage;
+      var isFirstPageInSection = true;
+
+      for (final verse in section.verses) {
+        if (currentPage == null || currentPage.sourcePage != verse.sourcePage) {
+          currentPage = _ReaderPage(
+            section: section,
+            sourcePage: verse.sourcePage,
+            showSectionHeader: isFirstPageInSection,
+            verses: [verse],
+          );
+          pages.add(currentPage);
+          isFirstPageInSection = false;
+        } else {
+          currentPage.verses.add(verse);
+        }
+      }
+    }
+
+    return pages;
+  }
+
+  Widget _buildPagePicker(List<_ReaderPage> pages, int selectedIndex) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.72),
+        border: Border(
+          bottom: BorderSide(
+            color: AppTheme.liturgicalGold.withValues(alpha: 0.32),
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 16, 8),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.menu_book_rounded,
+              size: 22,
+              color: AppTheme.controlGreen,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+                  value: selectedIndex,
+                  isExpanded: true,
+                  menuMaxHeight: 420,
+                  borderRadius: BorderRadius.circular(18),
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                  onChanged: (index) {
+                    if (index != null) {
+                      _goToPage(index, pages.length);
+                    }
+                  },
+                  items: List.generate(pages.length, (index) {
+                    return DropdownMenuItem<int>(
+                      value: index,
+                      child: Text(
+                        _pageLabel(pages[index], index),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '${selectedIndex + 1} / ${pages.length}',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildBookPageTransition({
+    required _ReaderPage page,
+    required int index,
+  }) {
+    return AnimatedBuilder(
+      animation: _pageController,
+      child: _buildBookPage(page, index),
+      builder: (context, child) {
+        var position = _currentPageIndex.toDouble();
+
+        if (_pageController.hasClients &&
+            _pageController.position.hasContentDimensions) {
+          position = _pageController.page ?? position;
+        }
+
+        final distance = (position - index).clamp(-1.0, 1.0).toDouble();
+        final turnAmount = distance * 0.055;
+
+        return Transform(
+          alignment: distance > 0
+              ? Alignment.centerLeft
+              : Alignment.centerRight,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001)
+            ..rotateY(turnAmount),
+          child: Opacity(opacity: 1 - (distance.abs() * 0.1), child: child),
+        );
+      },
+    );
+  }
+
+  Widget _buildBookPage(_ReaderPage page, int index) {
+    return RefreshIndicator(
+      onRefresh: () => _viewModel.loadContent(refresh: true),
+      child: ListView(
+        key: PageStorageKey<String>(
+          'reader-${page.section.id}-${page.sourcePage ?? index}',
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          if (page.showSectionHeader) _buildSectionHeader(page.section),
+          for (final verse in page.verses) _buildVerse(verse),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPageFooter(List<_ReaderPage> pages, int selectedIndex) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isFirst = selectedIndex == 0;
+    final isLast = selectedIndex == pages.length - 1;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.78),
+        border: Border(
+          top: BorderSide(
+            color: AppTheme.liturgicalGold.withValues(alpha: 0.32),
+          ),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            LinearProgressIndicator(
+              value: (selectedIndex + 1) / pages.length,
+              minHeight: 2,
+              backgroundColor: AppTheme.liturgicalGold.withValues(alpha: 0.15),
+              color: AppTheme.controlGreen,
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: isFirst
+                        ? null
+                        : () => _goToPage(selectedIndex - 1, pages.length),
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    label: Text(
+                      _selectedLanguage == ReaderLanguage.english
+                          ? 'Previous'
+                          : 'ቀዳሚ',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: isLast
+                        ? null
+                        : () => _goToPage(selectedIndex + 1, pages.length),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _selectedLanguage == ReaderLanguage.english
+                              ? 'Next'
+                              : 'ቀጣይ',
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_rounded),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _goToPage(int index, int pageCount) {
+    if (index < 0 || index >= pageCount || index == _currentPageIndex) {
+      return;
+    }
+
+    if (!_pageController.hasClients) {
+      setState(() {
+        _currentPageIndex = index;
+      });
+      return;
+    }
+
+    if ((index - _currentPageIndex).abs() > 3) {
+      _pageController.jumpToPage(index);
+      return;
+    }
+
+    unawaited(
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 460),
+        curve: Curves.easeInOutCubic,
+      ),
+    );
+  }
+
+  String _pageLabel(_ReaderPage page, int index) {
+    final number = page.sourcePage ?? index + 1;
+
+    return _selectedLanguage == ReaderLanguage.english
+        ? 'Page $number'
+        : 'ገጽ $number';
   }
 
   Widget _buildSectionHeader(LiturgySection section) {
@@ -424,4 +688,18 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
       _ => Theme.of(context).colorScheme.primary,
     };
   }
+}
+
+final class _ReaderPage {
+  _ReaderPage({
+    required this.section,
+    required this.sourcePage,
+    required this.showSectionHeader,
+    required this.verses,
+  });
+
+  final LiturgySection section;
+  final int? sourcePage;
+  final bool showSectionHeader;
+  final List<Verse> verses;
 }
