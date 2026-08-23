@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/history/reading_history.dart';
+import '../core/localization/app_language.dart';
 import '../core/preferences/reader_preferences.dart';
 import '../features/history/presentation/recent_screen.dart';
 import '../features/liturgies/data/liturgy_repository.dart';
@@ -12,12 +13,16 @@ class AppShell extends StatefulWidget {
     required this.repository,
     required this.preferencesStore,
     required this.historyStore,
+    required this.appLanguage,
+    required this.onAppLanguageChanged,
     super.key,
   });
 
   final LiturgyRepository repository;
   final ReaderPreferencesStore preferencesStore;
   final ReadingHistoryStore historyStore;
+  final AppLanguage appLanguage;
+  final ValueChanged<AppLanguage> onAppLanguageChanged;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -43,6 +48,7 @@ class _AppShellState extends State<AppShell> {
             repository: widget.repository,
             preferencesStore: widget.preferencesStore,
             historyStore: widget.historyStore,
+            appLanguage: widget.appLanguage,
             onHistoryChanged: _historyChanged,
           ),
           RecentScreen(
@@ -50,11 +56,14 @@ class _AppShellState extends State<AppShell> {
             repository: widget.repository,
             preferencesStore: widget.preferencesStore,
             historyStore: widget.historyStore,
+            appLanguage: widget.appLanguage,
             onHistoryChanged: _historyChanged,
           ),
           SettingsScreen(
             preferencesStore: widget.preferencesStore,
             historyStore: widget.historyStore,
+            appLanguage: widget.appLanguage,
+            onAppLanguageChanged: widget.onAppLanguageChanged,
             onHistoryChanged: _historyChanged,
           ),
         ],
@@ -66,21 +75,24 @@ class _AppShellState extends State<AppShell> {
             _selectedIndex = index;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.auto_stories_outlined),
-            selectedIcon: Icon(Icons.auto_stories_rounded),
-            label: 'ቅዳሴ',
+            icon: const Icon(Icons.auto_stories_outlined),
+            selectedIcon: const Icon(Icons.auto_stories_rounded),
+            label: widget.appLanguage.text(amharic: 'ቅዳሴ', english: 'Liturgy'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history_rounded),
-            label: 'የቅርብ',
+            icon: const Icon(Icons.history_outlined),
+            selectedIcon: const Icon(Icons.history_rounded),
+            label: widget.appLanguage.text(amharic: 'የቅርብ', english: 'Recent'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.tune_outlined),
-            selectedIcon: Icon(Icons.tune_rounded),
-            label: 'ቅንብር',
+            icon: const Icon(Icons.tune_outlined),
+            selectedIcon: const Icon(Icons.tune_rounded),
+            label: widget.appLanguage.text(
+              amharic: 'ቅንብር',
+              english: 'Settings',
+            ),
           ),
         ],
       ),

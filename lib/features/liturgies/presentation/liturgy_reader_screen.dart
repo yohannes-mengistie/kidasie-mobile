@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../core/localization/app_language.dart';
 import '../../../core/preferences/reader_preferences.dart';
 import '../../../core/sharing/app_share_service.dart';
 import '../../../core/widgets/sacred_text.dart';
@@ -16,12 +17,14 @@ class LiturgyReaderScreen extends StatefulWidget {
     required this.liturgy,
     required this.repository,
     required this.preferencesStore,
+    required this.appLanguage,
     super.key,
   });
 
   final Liturgy liturgy;
   final LiturgyRepository repository;
   final ReaderPreferencesStore preferencesStore;
+  final AppLanguage appLanguage;
 
   @override
   State<LiturgyReaderScreen> createState() => _LiturgyReaderScreenState();
@@ -35,6 +38,10 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   double _textScale = 1;
   bool _highlightSacredNames = true;
   int _currentPageIndex = 0;
+
+  String _ui({required String amharic, required String english}) {
+    return widget.appLanguage.text(amharic: amharic, english: english);
+  }
 
   @override
   void initState() {
@@ -77,9 +84,12 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.liturgy.nameAm.isNotEmpty
+    final amharicTitle = widget.liturgy.nameAm.isNotEmpty
         ? widget.liturgy.nameAm
         : widget.liturgy.name;
+    final title = widget.appLanguage.isEnglish
+        ? widget.liturgy.name
+        : amharicTitle;
 
     return Scaffold(
       appBar: AppBar(
@@ -87,7 +97,10 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
         actions: [
           PopupMenuButton<ReaderLanguage>(
             initialValue: _selectedLanguage,
-            tooltip: 'ቋንቋ ይምረጡ',
+            tooltip: _ui(
+              amharic: 'የጽሑፍ ቋንቋ ይምረጡ',
+              english: 'Choose content language',
+            ),
             icon: const Icon(Icons.translate),
             onSelected: (language) {
               setState(() {
@@ -100,7 +113,9 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
                 CheckedPopupMenuItem(
                   value: ReaderLanguage.all,
                   checked: _selectedLanguage == ReaderLanguage.all,
-                  child: const Text('ሁሉም ቋንቋዎች'),
+                  child: Text(
+                    _ui(amharic: 'ሁሉም ቋንቋዎች', english: 'All languages'),
+                  ),
                 ),
                 CheckedPopupMenuItem(
                   value: ReaderLanguage.geez,
@@ -122,7 +137,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
           ),
           PopupMenuButton<double>(
             initialValue: _textScale,
-            tooltip: 'Text size',
+            tooltip: _ui(amharic: 'የፊደል መጠን', english: 'Text size'),
             icon: const Icon(Icons.text_fields),
             onSelected: (scale) {
               setState(() {
@@ -135,33 +150,33 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
                 CheckedPopupMenuItem(
                   value: 0.9,
                   checked: _textScale == 0.9,
-                  child: const Text('Small'),
+                  child: Text(_ui(amharic: 'ትንሽ', english: 'Small')),
                 ),
                 CheckedPopupMenuItem(
                   value: 1.0,
                   checked: _textScale == 1.0,
-                  child: const Text('Normal'),
+                  child: Text(_ui(amharic: 'መደበኛ', english: 'Normal')),
                 ),
                 CheckedPopupMenuItem(
                   value: 1.2,
                   checked: _textScale == 1.2,
-                  child: const Text('Large'),
+                  child: Text(_ui(amharic: 'ትልቅ', english: 'Large')),
                 ),
                 CheckedPopupMenuItem(
                   value: 1.4,
                   checked: _textScale == 1.4,
-                  child: const Text('Extra large'),
+                  child: Text(_ui(amharic: 'በጣም ትልቅ', english: 'Extra large')),
                 ),
               ];
             },
           ),
           IconButton(
-            tooltip: 'ይዘቱን አድስ',
+            tooltip: _ui(amharic: 'ይዘቱን አድስ', english: 'Refresh content'),
             onPressed: () => _viewModel.loadContent(refresh: true),
             icon: const Icon(Icons.sync_rounded),
           ),
           IconButton(
-            tooltip: 'ይህን ቅዳሴ ያጋሩ',
+            tooltip: _ui(amharic: 'ይህን ቅዳሴ ያጋሩ', english: 'Share this liturgy'),
             onPressed: () => AppShareService.shareLiturgy(widget.liturgy),
             icon: const Icon(Icons.ios_share_rounded),
           ),
@@ -415,11 +430,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
                         ? null
                         : () => _goToPage(selectedIndex - 1, pages.length),
                     icon: const Icon(Icons.arrow_back_rounded),
-                    label: Text(
-                      _selectedLanguage == ReaderLanguage.english
-                          ? 'Previous'
-                          : 'ቀዳሚ',
-                    ),
+                    label: Text(_ui(amharic: 'ቀዳሚ', english: 'Previous')),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -431,11 +442,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          _selectedLanguage == ReaderLanguage.english
-                              ? 'Next'
-                              : 'ቀጣይ',
-                        ),
+                        Text(_ui(amharic: 'ቀጣይ', english: 'Next')),
                         const SizedBox(width: 8),
                         const Icon(Icons.arrow_forward_rounded),
                       ],
@@ -479,7 +486,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   String _pageLabel(_ReaderPage page, int index) {
     final number = page.sourcePage ?? index + 1;
 
-    return _selectedLanguage == ReaderLanguage.english
+    return widget.appLanguage.isEnglish
         ? 'Page $number'
         : 'ገጽ $number';
   }
@@ -555,9 +562,10 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
           if (!hasVisibleText) ...[
             const SizedBox(height: 14),
             Text(
-              _selectedLanguage == ReaderLanguage.english
-                  ? 'Text is unavailable in the selected language.'
-                  : 'በተመረጠው ቋንቋ ጽሑፍ አልተገኘም።',
+              _ui(
+                amharic: 'በተመረጠው ቋንቋ ጽሑፍ አልተገኘም።',
+                english: 'Text is unavailable in the selected language.',
+              ),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
@@ -622,14 +630,16 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              _viewModel.errorMessage ?? 'Something went wrong.',
+              widget.appLanguage.isEnglish
+                  ? (_viewModel.errorMessage ?? 'Something went wrong.')
+                  : 'ይዘቱን መጫን አልተቻለም። እባክዎ እንደገና ይሞክሩ።',
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: _viewModel.loadContent,
               icon: const Icon(Icons.refresh),
-              label: const Text('Try again'),
+              label: Text(_ui(amharic: 'እንደገና ሞክር', english: 'Try again')),
             ),
           ],
         ),
@@ -638,11 +648,14 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   }
 
   Widget _buildEmpty() {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         child: Text(
-          'This liturgy does not contain any sections yet.',
+          _ui(
+            amharic: 'ይህ ቅዳሴ እስካሁን ምንም ክፍል የለውም።',
+            english: 'This liturgy does not contain any sections yet.',
+          ),
           textAlign: TextAlign.center,
         ),
       ),

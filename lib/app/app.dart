@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:orthodox_liturgy/core/config/app_config.dart';
 import 'package:orthodox_liturgy/core/history/reading_history.dart';
+import 'package:orthodox_liturgy/core/localization/app_language.dart';
 import 'package:orthodox_liturgy/core/preferences/reader_preferences.dart';
 import 'package:orthodox_liturgy/features/liturgies/data/liturgy_api_service.dart';
 import 'package:orthodox_liturgy/features/liturgies/data/liturgy_local_data_source.dart';
@@ -12,6 +16,7 @@ import 'theme/app_theme.dart';
 
 class KidasieApp extends StatefulWidget {
   const KidasieApp({super.key});
+
   @override
   State<KidasieApp> createState() => _KidasieAppState();
 }
@@ -21,6 +26,8 @@ class _KidasieAppState extends State<KidasieApp> {
   late final LiturgyRepository _liturgyRepository;
   late final ReaderPreferencesStore _readerPreferencesStore;
   late final ReadingHistoryStore _historyStore;
+
+  AppLanguage _appLanguage = AppLanguage.amharic;
 
   @override
   void initState() {
@@ -36,6 +43,29 @@ class _KidasieAppState extends State<KidasieApp> {
     );
     _readerPreferencesStore = ReaderPreferencesStore();
     _historyStore = ReadingHistoryStore();
+    unawaited(_loadAppLanguage());
+  }
+
+  Future<void> _loadAppLanguage() async {
+    final preferences = await _readerPreferencesStore.load();
+    if (!mounted || preferences.appLanguage == _appLanguage) {
+      return;
+    }
+
+    setState(() {
+      _appLanguage = preferences.appLanguage;
+    });
+  }
+
+  void _setAppLanguage(AppLanguage language) {
+    if (_appLanguage == language) {
+      return;
+    }
+
+    setState(() {
+      _appLanguage = language;
+    });
+    unawaited(_readerPreferencesStore.saveAppLanguage(language));
   }
 
   @override
@@ -47,13 +77,21 @@ class _KidasieAppState extends State<KidasieApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ሥርዐተ ቅዳሴ',
+      title: _appLanguage.text(
+        amharic: 'ሥርዐተ ቅዳሴ',
+        english: 'Orthodox Liturgy',
+      ),
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      locale: _appLanguage.locale,
+      supportedLocales: const [Locale('am'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: AppShell(
         repository: _liturgyRepository,
         preferencesStore: _readerPreferencesStore,
         historyStore: _historyStore,
+        appLanguage: _appLanguage,
+        onAppLanguageChanged: _setAppLanguage,
       ),
     );
   }

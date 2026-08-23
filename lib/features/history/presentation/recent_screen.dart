@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/history/reading_history.dart';
+import '../../../core/localization/app_language.dart';
 import '../../../core/preferences/reader_preferences.dart';
 import '../../liturgies/data/liturgy_repository.dart';
 import '../../liturgies/domain/liturgy.dart';
@@ -11,6 +12,7 @@ class RecentScreen extends StatefulWidget {
     required this.repository,
     required this.preferencesStore,
     required this.historyStore,
+    required this.appLanguage,
     required this.onHistoryChanged,
     super.key,
   });
@@ -18,6 +20,7 @@ class RecentScreen extends StatefulWidget {
   final LiturgyRepository repository;
   final ReaderPreferencesStore preferencesStore;
   final ReadingHistoryStore historyStore;
+  final AppLanguage appLanguage;
   final VoidCallback onHistoryChanged;
 
   @override
@@ -26,6 +29,10 @@ class RecentScreen extends StatefulWidget {
 
 class _RecentScreenState extends State<RecentScreen> {
   late Future<List<ReadingHistoryEntry>> _history;
+
+  String _ui({required String amharic, required String english}) {
+    return widget.appLanguage.text(amharic: amharic, english: english);
+  }
 
   @override
   void initState() {
@@ -45,6 +52,7 @@ class _RecentScreenState extends State<RecentScreen> {
           repository: widget.repository,
           liturgy: liturgy,
           preferencesStore: widget.preferencesStore,
+          appLanguage: widget.appLanguage,
         ),
       ),
     );
@@ -61,16 +69,7 @@ class _RecentScreenState extends State<RecentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('የቅርብ ንባብ'),
-            Text(
-              'Recent reading',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-            ),
-          ],
-        ),
+        title: Text(_ui(amharic: 'የቅርብ ንባብ', english: 'Recent reading')),
       ),
       body: SafeArea(
         child: FutureBuilder<List<ReadingHistoryEntry>>(
@@ -82,7 +81,7 @@ class _RecentScreenState extends State<RecentScreen> {
 
             final entries = snapshot.data ?? const [];
             if (entries.isEmpty) {
-              return const _EmptyHistory();
+              return _EmptyHistory(appLanguage: widget.appLanguage);
             }
 
             return ListView.separated(
@@ -92,17 +91,27 @@ class _RecentScreenState extends State<RecentScreen> {
               itemBuilder: (context, index) {
                 final entry = entries[index];
                 final liturgy = entry.liturgy;
+                final amharicName = liturgy.nameAm.isEmpty
+                    ? liturgy.name
+                    : liturgy.nameAm;
+                final primaryName = widget.appLanguage.isEnglish
+                    ? liturgy.name
+                    : amharicName;
+                final secondaryName = widget.appLanguage.isEnglish
+                    ? amharicName
+                    : liturgy.name;
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(vertical: 6),
                   leading: const Icon(Icons.menu_book_outlined),
                   title: Text(
-                    liturgy.nameAm.isEmpty ? liturgy.name : liturgy.nameAm,
+                    primaryName,
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   subtitle: Text(
-                    '${liturgy.name}\n${_relativeDate(entry.openedAt)}',
+                    (secondaryName == primaryName ? '' : '$secondaryName\n') +
+                        _relativeDate(entry.openedAt),
                   ),
-                  isThreeLine: true,
+                  isThreeLine: secondaryName != primaryName,
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _open(liturgy),
                 );
@@ -121,6 +130,15 @@ class _RecentScreenState extends State<RecentScreen> {
     final openedDay = DateTime(localDate.year, localDate.month, localDate.day);
     final days = today.difference(openedDay).inDays;
 
+    if (widget.appLanguage.isEnglish) {
+      return switch (days) {
+        0 => 'Today',
+        1 => 'Yesterday',
+        _ when days > 1 => '$days days ago',
+        _ => 'Recently',
+      };
+    }
+
     return switch (days) {
       0 => 'ዛሬ',
       1 => 'ትናንት',
@@ -131,21 +149,35 @@ class _RecentScreenState extends State<RecentScreen> {
 }
 
 class _EmptyHistory extends StatelessWidget {
-  const _EmptyHistory();
+  const _EmptyHistory({required this.appLanguage});
+
+  final AppLanguage appLanguage;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.history_rounded, size: 52),
-            SizedBox(height: 16),
-            Text('ገና የተነበበ ቅዳሴ የለም'),
-            SizedBox(height: 6),
-            Text('Your recently opened liturgies will appear here.'),
+            const Icon(Icons.history_rounded, size: 52),
+            const SizedBox(height: 16),
+            Text(
+              appLanguage.text(
+                amharic: 'ገና የተነበበ ቅዳሴ የለም',
+                english: 'Nothing read yet',
+              ),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              appLanguage.text(
+                amharic: 'በቅርቡ የከፈቷቸው ቅዳሴዎች እዚህ ይታያሉ።',
+                english: 'Your recently opened liturgies will appear here.',
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
