@@ -269,7 +269,11 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
               });
             },
             itemBuilder: (context, index) {
-              return _buildBookPageTransition(page: pages[index], index: index);
+              return _buildBookPageTransition(
+                page: pages[index],
+                index: index,
+                pageCount: pages.length,
+              );
             },
           ),
         ),
@@ -368,10 +372,17 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   Widget _buildBookPageTransition({
     required _ReaderPage page,
     required int index,
+    required int pageCount,
   }) {
     return AnimatedBuilder(
       animation: _pageController,
-      child: _buildBookPage(page, index),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: index == pageCount - 1
+            ? null
+            : () => _goToPage(index + 1, pageCount),
+        child: _buildBookPage(page, index),
+      ),
       builder: (context, child) {
         var position = _currentPageIndex.toDouble();
 
@@ -415,8 +426,6 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
 
   Widget _buildPageFooter(List<_ReaderPage> pages, int selectedIndex) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isFirst = selectedIndex == 0;
-    final isLast = selectedIndex == pages.length - 1;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -429,47 +438,12 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
       ),
       child: SafeArea(
         top: false,
-        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            LinearProgressIndicator(
-              value: (selectedIndex + 1) / pages.length,
-              minHeight: 2,
-              backgroundColor: AppTheme.liturgicalGold.withValues(alpha: 0.15),
-              color: AppTheme.controlGreen,
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: isFirst
-                        ? null
-                        : () => _goToPage(selectedIndex - 1, pages.length),
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    label: Text(_ui(amharic: 'ቀዳሚ', english: 'Previous')),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: isLast
-                        ? null
-                        : () => _goToPage(selectedIndex + 1, pages.length),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(_ui(amharic: 'ቀጣይ', english: 'Next')),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_forward_rounded),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        child: LinearProgressIndicator(
+          value: (selectedIndex + 1) / pages.length,
+          minHeight: 2,
+          backgroundColor: AppTheme.liturgicalGold.withValues(alpha: 0.15),
+          color: AppTheme.controlGreen,
         ),
       ),
     );
