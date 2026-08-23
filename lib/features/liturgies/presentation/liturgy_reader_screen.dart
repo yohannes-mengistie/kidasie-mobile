@@ -10,6 +10,7 @@ import '../../../core/widgets/sacred_text.dart';
 import '../data/liturgy_repository.dart';
 import '../domain/liturgy.dart';
 import '../domain/liturgy_content.dart';
+import 'liturgy_guide_card_reader.dart';
 import 'liturgy_reader_view_model.dart';
 
 class LiturgyReaderScreen extends StatefulWidget {
@@ -207,6 +208,16 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
 
         if (content == null || content.sections.isEmpty) {
           return _buildEmpty();
+        }
+
+        if (content.liturgy.slug == 'liturgy-guide') {
+          return LiturgyGuideCardReader(
+            content: content,
+            selectedLanguage: _selectedLanguage,
+            textScale: _textScale,
+            highlightSacredNames: _highlightSacredNames,
+            appLanguage: widget.appLanguage,
+          );
         }
 
         return _buildContent(content);
@@ -486,9 +497,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   String _pageLabel(_ReaderPage page, int index) {
     final number = page.sourcePage ?? index + 1;
 
-    return widget.appLanguage.isEnglish
-        ? 'Page $number'
-        : 'ገጽ $number';
+    return widget.appLanguage.isEnglish ? 'Page $number' : 'ገጽ $number';
   }
 
   Widget _buildSectionHeader(LiturgySection section) {

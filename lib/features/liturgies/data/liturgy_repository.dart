@@ -24,7 +24,9 @@ final class LiturgyRepository {
     try {
       final remote = await _apiService.fetchLiturgies();
       await _localDataSource.writeLiturgies(remote);
-      return remote;
+
+      final merged = await _localDataSource.readLiturgies();
+      return merged.isEmpty ? remote : merged;
     } catch (_) {
       final local = await _localDataSource.readLiturgies();
       if (local.isNotEmpty) {
