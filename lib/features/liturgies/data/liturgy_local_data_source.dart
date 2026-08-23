@@ -15,12 +15,29 @@ final class LiturgyLocalDataSource {
   Future<List<Liturgy>> readLiturgies() async {
     final cached = await _readCacheFile('liturgies.json');
     final fromCache = _decodeLiturgies(cached);
-    if (fromCache.isNotEmpty) {
+    final bundled = await _readAsset('$_assetDirectory/liturgies.json');
+    final fromBundle = _decodeLiturgies(bundled);
+
+    if (fromCache.isEmpty) {
+      return fromBundle;
+    }
+    if (fromBundle.isEmpty) {
       return fromCache;
     }
 
-    final bundled = await _readAsset('$_assetDirectory/liturgies.json');
-    return _decodeLiturgies(bundled);
+    final bySlug = <String, Liturgy>{
+      for (final liturgy in fromBundle) liturgy.slug: liturgy,
+    };
+
+    for (final liturgy in fromCache) {
+      final bundledLiturgy = bySlug[liturgy.slug];
+      if (bundledLiturgy == null ||
+          liturgy.contentVersion >= bundledLiturgy.contentVersion) {
+        bySlug[liturgy.slug] = liturgy;
+      }
+    }
+
+    return List.unmodifiable(bySlug.values);
   }
 
   Future<void> writeLiturgies(List<Liturgy> liturgies) {

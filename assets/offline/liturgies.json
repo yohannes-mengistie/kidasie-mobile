@@ -1,11 +1,1 @@
-{
-  "data": [
-    {
-      "id": 1,
-      "slug": "st-mary",
-      "name": "Anaphora of St. Mary",
-      "name_am": "የእመቤታችን የድንግል ማርያም ቅዳሴ",
-      "content_version": 487
-    }
-  ]
-}
+{"data":[{"id":1,"slug":"st-mary","name":"Anaphora of St. Mary","name_am":"የእመቤታችን የድንግል ማርያም ቅዳሴ","content_version":972},{"id":4,"slug":"apostles","name":"Anaphora of the Apostles","name_am":"የሐዋርያት ቅዳሴ","content_version":424},{"id":5,"slug":"our-lord-jesus-christ","name":"Anaphora of Our Lord Jesus Christ","name_am":"የጌታችን የኢየሱስ ክርስቶስ ቅዳሴ","content_version":262},{"id":6,"slug":"st-athanasius","name":"Anaphora of St. Athanasius","name_am":"የቅዱስ አትናቴዎስ ቅዳሴ","content_version":442}]}
