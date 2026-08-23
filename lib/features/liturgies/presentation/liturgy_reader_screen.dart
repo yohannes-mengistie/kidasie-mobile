@@ -583,10 +583,12 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
             SacredText(
               verse.textGeez,
               sacredColor: AppTheme.sacredRed,
+              sacredFontWeight: FontWeight.w700,
               textAlign: TextAlign.justify,
               enabled: _highlightSacredNames,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontSize: 22 * _textScale,
+                fontWeight: FontWeight.w700,
                 height: 1.68,
               ),
             ),

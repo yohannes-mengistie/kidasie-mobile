@@ -4,6 +4,7 @@ class SacredText extends StatelessWidget {
   const SacredText(
     this.text, {
     required this.sacredColor,
+    this.sacredFontWeight,
     this.enabled = true,
     this.style,
     this.textAlign,
@@ -14,6 +15,7 @@ class SacredText extends StatelessWidget {
 
   final String text;
   final Color sacredColor;
+  final FontWeight? sacredFontWeight;
   final bool enabled;
   final TextStyle? style;
   final TextAlign? textAlign;
@@ -41,7 +43,7 @@ class SacredText extends StatelessWidget {
     'ሥላሴ',
     'አምላክ',
     'ወልድ',
-    'አብ'
+    'አብ',
   ];
 
   static final String _ethiopicTermPattern = _ethiopicTerms
@@ -86,7 +88,10 @@ class SacredText extends StatelessWidget {
       spans.add(
         TextSpan(
           text: match.group(0),
-          style: TextStyle(color: sacredColor, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: sacredColor,
+            fontWeight: sacredFontWeight ?? FontWeight.w600,
+          ),
         ),
       );
       cursor = match.end;

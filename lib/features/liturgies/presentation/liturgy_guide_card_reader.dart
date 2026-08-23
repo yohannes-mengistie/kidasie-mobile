@@ -367,54 +367,17 @@ class _LiturgyGuideCardReaderState extends State<LiturgyGuideCardReader> {
   }
 
   Widget _buildFooter(int selectedIndex, int cardCount) {
-    final isFirst = selectedIndex == 0;
-    final isLast = selectedIndex == cardCount - 1;
-
     return SafeArea(
       top: false,
-      minimum: const EdgeInsets.fromLTRB(18, 0, 18, 12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: (selectedIndex + 1) / cardCount,
-              minHeight: 4,
-              backgroundColor: AppTheme.liturgicalGold.withValues(alpha: 0.16),
-              color: AppTheme.controlGreen,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: isFirst
-                      ? null
-                      : () => _goToCard(selectedIndex - 1, cardCount),
-                  icon: const Icon(Icons.arrow_back_rounded),
-                  label: Text(_ui(amharic: 'ቀዳሚ', english: 'Previous')),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: isLast
-                      ? null
-                      : () => _goToCard(selectedIndex + 1, cardCount),
-                  iconAlignment: IconAlignment.end,
-                  icon: const Icon(Icons.arrow_forward_rounded),
-                  label: Text(
-                    isLast
-                        ? _ui(amharic: 'ተጠናቋል', english: 'Completed')
-                        : _ui(amharic: 'ቀጣይ', english: 'Next'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+      minimum: const EdgeInsets.fromLTRB(18, 0, 18, 14),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(999),
+        child: LinearProgressIndicator(
+          value: (selectedIndex + 1) / cardCount,
+          minHeight: 4,
+          backgroundColor: AppTheme.liturgicalGold.withValues(alpha: 0.16),
+          color: AppTheme.controlGreen,
+        ),
       ),
     );
   }

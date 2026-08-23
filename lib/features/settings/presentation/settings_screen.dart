@@ -211,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             const SizedBox(height: 4),
                             Text(
                               _ui(
-                                amharic: 'የምናሌዎችንና የመቆጣጠሪያዎችን ቋንቋ ይቀይሩ።',
+                                amharic: 'የማውጫዎችንና የመቆጣጠሪያዎችን ቋንቋ ይቀይሩ።',
                                 english:
                                     'Change the language of menus and controls.',
                               ),
