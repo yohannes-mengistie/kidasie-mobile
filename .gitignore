@@ -44,3 +44,8 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /android/.kotlin/
+
+# Private Android release-signing material. Never commit these files.
+/android/key.properties
+/android/*.jks
+/android/*.keystore
