@@ -105,11 +105,7 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF082E52),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF082E52),
-        foregroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
         title: Text(_ui(amharic: 'ሥርዐተ ቅዳሴ', english: 'Divine Liturgy')),
         actions: [
           IconButton(
@@ -127,7 +123,11 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
         child: DecoratedBox(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF082E52), Color(0xFF0D5681), Color(0xFF0A3D66)],
+              colors: [
+                AppTheme.parchment,
+                Color(0xFFF8EFD9),
+                Color(0xFFEFE0C1),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -156,8 +156,6 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
         }
 
         return RefreshIndicator(
-          color: Colors.white,
-          backgroundColor: const Color(0xFF0A4C78),
           onRefresh: _viewModel.synchronizeContent,
           child: ListView.builder(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -282,17 +280,17 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
         child: Material(
-          color: const Color(0xFFF8FBFF).withValues(alpha: 0.9),
+          color: AppTheme.parchmentSurface.withValues(alpha: 0.7),
           child: InkWell(
             onTap: () => _openLiturgy(liturgy),
             child: Container(
               padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.white.withValues(alpha: 0.58)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.72)),
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF031D35).withValues(alpha: 0.2),
+                    color: AppTheme.inkBlack.withValues(alpha: 0.07),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
