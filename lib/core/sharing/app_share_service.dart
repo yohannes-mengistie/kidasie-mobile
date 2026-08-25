@@ -70,8 +70,7 @@ final class AppShareService {
       ShareParams(
         title: amharicName,
         subject: liturgy.name,
-        text:
-            '$amharicName\n${liturgy.name}\n\nበሥርዓተ ቅዳሴ መተግበሪያ ያንብቡ።',
+        text: '$amharicName\n${liturgy.name}\n\nበሥርዓተ ቅዳሴ መተግበሪያ ያንብቡ።',
       ),
     );
   }

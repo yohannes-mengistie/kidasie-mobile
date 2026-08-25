@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/theme/app_theme.dart';
 import '../../../core/history/reading_history.dart';
 import '../../../core/localization/app_language.dart';
 import '../../../core/preferences/reader_preferences.dart';
+import '../../../core/widgets/glass_surface.dart';
 import '../../liturgies/data/liturgy_repository.dart';
 import '../../liturgies/domain/liturgy.dart';
 import '../../liturgies/presentation/liturgy_reader_screen.dart';
@@ -72,52 +74,77 @@ class _RecentScreenState extends State<RecentScreen> {
         title: Text(_ui(amharic: 'የቅርብ ንባብ', english: 'Recent reading')),
       ),
       body: SafeArea(
-        child: FutureBuilder<List<ReadingHistoryEntry>>(
-          future: _history,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        child: ParchmentBackdrop(
+          child: FutureBuilder<List<ReadingHistoryEntry>>(
+            future: _history,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            final entries = snapshot.data ?? const [];
-            if (entries.isEmpty) {
-              return _EmptyHistory(appLanguage: widget.appLanguage);
-            }
+              final entries = snapshot.data ?? const [];
+              if (entries.isEmpty) {
+                return _EmptyHistory(appLanguage: widget.appLanguage);
+              }
 
-            return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-              itemCount: entries.length,
-              separatorBuilder: (context, index) => const Divider(),
-              itemBuilder: (context, index) {
-                final entry = entries[index];
-                final liturgy = entry.liturgy;
-                final amharicName = liturgy.nameAm.isEmpty
-                    ? liturgy.name
-                    : liturgy.nameAm;
-                final primaryName = widget.appLanguage.isEnglish
-                    ? liturgy.name
-                    : amharicName;
-                final secondaryName = widget.appLanguage.isEnglish
-                    ? amharicName
-                    : liturgy.name;
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 6),
-                  leading: const Icon(Icons.menu_book_outlined),
-                  title: Text(
-                    primaryName,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  subtitle: Text(
-                    (secondaryName == primaryName ? '' : '$secondaryName\n') +
-                        _relativeDate(entry.openedAt),
-                  ),
-                  isThreeLine: secondaryName != primaryName,
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => _open(liturgy),
-                );
-              },
-            );
-          },
+              return ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                itemCount: entries.length,
+                itemBuilder: (context, index) {
+                  final entry = entries[index];
+                  final liturgy = entry.liturgy;
+                  final amharicName = liturgy.nameAm.isEmpty
+                      ? liturgy.name
+                      : liturgy.nameAm;
+                  final primaryName = widget.appLanguage.isEnglish
+                      ? liturgy.name
+                      : amharicName;
+                  final secondaryName = widget.appLanguage.isEnglish
+                      ? amharicName
+                      : liturgy.name;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: GlassSurface(
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 7,
+                        ),
+                        leading: Container(
+                          width: 44,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: AppTheme.controlGreen.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Icon(
+                            liturgy.hasAudio
+                                ? Icons.headphones_rounded
+                                : Icons.menu_book_rounded,
+                            color: AppTheme.controlGreen,
+                          ),
+                        ),
+                        title: Text(
+                          primaryName,
+                          style: const TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        subtitle: Text(
+                          (secondaryName == primaryName
+                                  ? ''
+                                  : '$secondaryName\n') +
+                              _relativeDate(entry.openedAt),
+                        ),
+                        isThreeLine: secondaryName != primaryName,
+                        trailing: const Icon(Icons.chevron_right_rounded),
+                        onTap: () => _open(liturgy),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         ),
       ),
     );

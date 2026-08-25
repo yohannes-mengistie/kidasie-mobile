@@ -1,0 +1,13 @@
+{
+  "data": {
+    "liturgy": {
+      "id": 25,
+      "slug": "st-jacob-of-serough",
+      "name": "Anaphora of St. Jacob of Serough",
+      "name_am": "የቅዱስ ያዕቆብ ዘሥሩግ ቅዳሴ",
+      "content_version": 4,
+      "has_content": false
+    },
+    "sections": []
+  }
+}

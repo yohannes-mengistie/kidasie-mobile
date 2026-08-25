@@ -1,0 +1,13 @@
+{
+  "data": {
+    "liturgy": {
+      "id": 22,
+      "slug": "st-basil",
+      "name": "Anaphora of St. Basil",
+      "name_am": "የቅዱስ ባስልዮስ ቅዳሴ",
+      "content_version": 4,
+      "has_content": false
+    },
+    "sections": []
+  }
+}

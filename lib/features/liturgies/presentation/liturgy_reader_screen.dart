@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../core/audio/liturgy_audio_controller.dart';
+import '../../../core/audio/liturgy_audio_player.dart';
 import '../../../core/localization/app_language.dart';
 import '../../../core/preferences/reader_preferences.dart';
 import '../../../core/sharing/app_share_service.dart';
+import '../../../core/widgets/glass_surface.dart';
 import '../../../core/widgets/sacred_text.dart';
 import '../data/liturgy_repository.dart';
 import '../domain/liturgy.dart';
@@ -34,6 +37,7 @@ class LiturgyReaderScreen extends StatefulWidget {
 class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   late final LiturgyReaderViewModel _viewModel;
   late final PageController _pageController;
+  LiturgyAudioController? _audioController;
 
   ReaderLanguage _selectedLanguage = ReaderLanguage.all;
   double _textScale = 1;
@@ -54,6 +58,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
     );
 
     _pageController = PageController();
+    _replaceAudioController(widget.liturgy.audio);
     unawaited(_loadContentAndSynchronize());
     unawaited(_loadPreferences());
   }
@@ -61,8 +66,40 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   Future<void> _loadContentAndSynchronize() async {
     await _viewModel.loadContent();
     if (!mounted) return;
+    _replaceAudioController(
+      _viewModel.content?.liturgy.audio ?? widget.liturgy.audio,
+    );
 
     await _viewModel.refreshSilently();
+    if (!mounted) return;
+    _replaceAudioController(
+      _viewModel.content?.liturgy.audio ?? widget.liturgy.audio,
+    );
+  }
+
+  Future<void> _refreshContent() async {
+    await _viewModel.loadContent(refresh: true);
+    if (!mounted) return;
+    _replaceAudioController(
+      _viewModel.content?.liturgy.audio ?? widget.liturgy.audio,
+    );
+  }
+
+  void _replaceAudioController(LiturgyAudio? audio) {
+    final current = _audioController;
+    final nextIdentity = audio == null ? null : '${audio.url}|${audio.sha256}';
+    if (current?.identity == nextIdentity) {
+      return;
+    }
+
+    current?.dispose();
+    _audioController = audio == null
+        ? null
+        : LiturgyAudioController(slug: widget.liturgy.slug, audio: audio);
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadPreferences() async {
@@ -85,6 +122,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
 
   @override
   void dispose() {
+    _audioController?.dispose();
     _viewModel.dispose();
     _pageController.dispose();
     super.dispose();
@@ -180,7 +218,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
           ),
           IconButton(
             tooltip: _ui(amharic: 'ይዘቱን አድስ', english: 'Refresh content'),
-            onPressed: () => _viewModel.loadContent(refresh: true),
+            onPressed: () => unawaited(_refreshContent()),
             icon: const Icon(Icons.sync_rounded),
           ),
           IconButton(
@@ -191,11 +229,13 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
         ],
       ),
       body: SafeArea(
-        child: ListenableBuilder(
-          listenable: _viewModel,
-          builder: (context, child) {
-            return _buildBody();
-          },
+        child: ParchmentBackdrop(
+          child: ListenableBuilder(
+            listenable: _viewModel,
+            builder: (context, child) {
+              return _buildBody();
+            },
+          ),
         ),
       ),
     );
@@ -214,21 +254,48 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
         final content = _viewModel.content;
 
         if (content == null || content.sections.isEmpty) {
-          return _buildEmpty();
+          return _withAudioPlayer(_buildEmpty());
         }
 
         if (content.liturgy.slug == 'liturgy-guide') {
-          return LiturgyGuideCardReader(
-            content: content,
-            selectedLanguage: _selectedLanguage,
-            textScale: _textScale,
-            highlightSacredNames: _highlightSacredNames,
-            appLanguage: widget.appLanguage,
+          return _withAudioPlayer(
+            LiturgyGuideCardReader(
+              content: content,
+              selectedLanguage: _selectedLanguage,
+              textScale: _textScale,
+              highlightSacredNames: _highlightSacredNames,
+              appLanguage: widget.appLanguage,
+            ),
           );
         }
 
-        return _buildContent(content);
+        return _withAudioPlayer(_buildContent(content));
     }
+  }
+
+  Widget _withAudioPlayer(Widget child) {
+    final controller = _audioController;
+    if (controller == null) {
+      return child;
+    }
+
+    return Stack(
+      children: [
+        Positioned.fill(child: child),
+        Positioned(
+          left: 12,
+          right: 12,
+          bottom: 12,
+          child: SafeArea(
+            top: false,
+            child: LiturgyAudioPlayer(
+              controller: controller,
+              appLanguage: widget.appLanguage,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildContent(LiturgyContent content) {
@@ -409,12 +476,17 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
 
   Widget _buildBookPage(_ReaderPage page, int index) {
     return RefreshIndicator(
-      onRefresh: () => _viewModel.loadContent(refresh: true),
+      onRefresh: _refreshContent,
       child: ListView(
         key: PageStorageKey<String>(
           'reader-${page.section.id}-${page.sourcePage ?? index}',
         ),
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+        padding: EdgeInsets.fromLTRB(
+          20,
+          8,
+          20,
+          _audioController == null ? 28 : 176,
+        ),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           if (page.showSectionHeader) _buildSectionHeader(page.section),
@@ -476,7 +548,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   }
 
   String _pageLabel(_ReaderPage page, int index) {
-    final number = page.sourcePage ?? index + 1;
+    final number = index + 1;
 
     return widget.appLanguage.isEnglish ? 'Page $number' : 'ገጽ $number';
   }
@@ -642,13 +714,44 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   Widget _buildEmpty() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          _ui(
-            amharic: 'ይህ ቅዳሴ እስካሁን ምንም ክፍል የለውም።',
-            english: 'This liturgy does not contain any sections yet.',
-          ),
-          textAlign: TextAlign.center,
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          _audioController == null ? 24 : 176,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _audioController == null
+                  ? Icons.hourglass_empty_rounded
+                  : Icons.headphones_rounded,
+              size: 52,
+              color: AppTheme.liturgicalGold,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _ui(amharic: 'ጽሑፉ በቅርብ ጊዜ ይጨመራል', english: 'Text coming soon'),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _audioController == null
+                  ? _ui(
+                      amharic: 'ጽሑፉና ድምፁ ከተዘጋጁ በኋላ በማደስ ማግኘት ይችላሉ።',
+                      english:
+                          'Refresh after the text or audio is published to receive it.',
+                    )
+                  : _ui(
+                      amharic: 'ሙሉውን የቅዳሴ ድምፅ ከታች ማዳመጥ ይችላሉ።',
+                      english:
+                          'You can listen to the complete liturgy audio below.',
+                    ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );

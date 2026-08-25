@@ -42,7 +42,7 @@ final class AppTheme {
         surfaceTintColor: Colors.transparent,
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: parchmentSurface,
+        backgroundColor: parchmentSurface.withValues(alpha: 0.9),
         indicatorColor: controlGreen.withValues(alpha: 0.14),
         elevation: 0,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
@@ -65,6 +65,10 @@ final class AppTheme {
         backgroundColor: parchmentMuted.withValues(alpha: 0.7),
         side: BorderSide.none,
         shape: const StadiumBorder(),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: parchmentSurface.withValues(alpha: 0.94),
+        surfaceTintColor: Colors.transparent,
       ),
     );
 

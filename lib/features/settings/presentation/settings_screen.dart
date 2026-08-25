@@ -7,6 +7,7 @@ import '../../../core/history/reading_history.dart';
 import '../../../core/localization/app_language.dart';
 import '../../../core/preferences/reader_preferences.dart';
 import '../../../core/sharing/app_share_service.dart';
+import '../../../core/widgets/glass_surface.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -185,241 +186,247 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: Text(_ui(amharic: 'ቅንብር', english: 'Settings')),
       ),
       body: SafeArea(
-        child: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                children: [
-                  _SettingsHero(appLanguage: _appLanguage),
-                  const SizedBox(height: 20),
-                  _SettingsSection(
-                    title: _ui(amharic: 'መተግበሪያ', english: 'Application'),
-                    icon: Icons.language_rounded,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _ui(
-                                amharic: 'የመተግበሪያ ቋንቋ',
-                                english: 'App language',
-                              ),
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _ui(
-                                amharic: 'የማውጫዎችንና የመቆጣጠሪያዎችን ቋንቋ ይቀይሩ።',
-                                english:
-                                    'Change the language of menus and controls.',
-                              ),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            const SizedBox(height: 14),
-                            SizedBox(
-                              width: double.infinity,
-                              child: SegmentedButton<AppLanguage>(
-                                segments: const [
-                                  ButtonSegment(
-                                    value: AppLanguage.amharic,
-                                    icon: Icon(Icons.translate_rounded),
-                                    label: Text('አማርኛ'),
-                                  ),
-                                  ButtonSegment(
-                                    value: AppLanguage.english,
-                                    icon: Icon(Icons.language_rounded),
-                                    label: Text('English'),
-                                  ),
-                                ],
-                                selected: {_appLanguage},
-                                onSelectionChanged: _setAppLanguage,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _SettingsSection(
-                    title: _ui(amharic: 'የንባብ ቅንብር', english: 'Reader'),
-                    icon: Icons.auto_stories_rounded,
-                    children: [
-                      ListTile(
-                        leading: const _SettingIcon(
-                          icon: Icons.menu_book_rounded,
-                        ),
-                        title: Text(
-                          _ui(amharic: 'የጽሑፍ ቋንቋ', english: 'Content language'),
-                        ),
-                        subtitle: Text(
-                          _ui(
-                            amharic: 'በአንባቢው ውስጥ የሚታየውን ጽሑፍ ይምረጡ።',
-                            english: 'Choose the text displayed in the reader.',
-                          ),
-                        ),
-                        trailing: DropdownButton<ReaderLanguage>(
-                          value: _preferences.language,
-                          underline: const SizedBox.shrink(),
-                          onChanged: _setReaderLanguage,
-                          items: ReaderLanguage.values.map((language) {
-                            return DropdownMenuItem(
-                              value: language,
-                              child: Text(_readerLanguageLabel(language)),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const Divider(indent: 72),
-                      ListTile(
-                        leading: const _SettingIcon(
-                          icon: Icons.format_size_rounded,
-                        ),
-                        title: Text(
-                          _ui(amharic: 'የፊደል መጠን', english: 'Text size'),
-                        ),
-                        subtitle: Slider(
-                          value: _textScales
-                              .indexOf(_preferences.textScale)
-                              .toDouble(),
-                          min: 0,
-                          max: (_textScales.length - 1).toDouble(),
-                          divisions: _textScales.length - 1,
-                          label: percent,
-                          onChanged: _setTextScale,
-                        ),
-                        trailing: Text(
-                          percent,
-                          style: const TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                      const Divider(indent: 72),
-                      SwitchListTile(
-                        secondary: const _SettingIcon(
-                          icon: Icons.auto_awesome_rounded,
-                          color: AppTheme.sacredRed,
-                        ),
-                        title: Text(
-                          _ui(
-                            amharic: 'ቅዱሳት ስሞችን በቀይ',
-                            english: 'Sacred names in red',
-                          ),
-                        ),
-                        subtitle: Text(
-                          _ui(
-                            amharic: 'የእግዚአብሔርንና የቅዱሳንን ስም ያጉሉ።',
-                            english:
-                                'Highlight divine and saint names while reading.',
-                          ),
-                        ),
-                        value: _preferences.highlightSacredNames,
-                        onChanged: _setSacredNames,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _SettingsSection(
-                    title: _ui(amharic: 'ከመስመር ውጭ', english: 'Offline'),
-                    icon: Icons.offline_pin_rounded,
-                    children: [
-                      ListTile(
-                        leading: const _SettingIcon(
-                          icon: Icons.download_done_rounded,
-                          color: AppTheme.controlGreen,
-                        ),
-                        title: Text(
-                          _ui(
-                            amharic: 'ቅዳሴ ማርያም ዝግጁ ነው',
-                            english: 'Anaphora of St. Mary is ready',
-                          ),
-                        ),
-                        subtitle: Text(
-                          _ui(
-                            amharic: 'የተቀመጠውን ሙሉ ጽሑፍ ያለ ኢንተርኔት ማንበብ ይችላሉ።',
-                            english:
-                                'Saved content remains readable without internet.',
-                          ),
-                        ),
-                        trailing: const Icon(
-                          Icons.check_circle_rounded,
-                          color: AppTheme.controlGreen,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _SettingsSection(
-                    title: _ui(amharic: 'ማጋራትና ውሂብ', english: 'Share & data'),
-                    icon: Icons.hub_outlined,
-                    children: [
-                      ListTile(
-                        leading: const _SettingIcon(
-                          icon: Icons.android_rounded,
-                          color: AppTheme.controlGreen,
-                        ),
-                        title: Text(
-                          _ui(
-                            amharic: 'መተግበሪያውን እንደ APK ያጋሩ',
-                            english: 'Share the app as an APK',
-                          ),
-                        ),
-                        subtitle: Text(
-                          _ui(
-                            amharic:
-                                'የተጫነውን APK በBluetooth፣ Telegram ወይም በሌላ መተግበሪያ ይላኩ።',
-                            english:
-                                'Send the installed APK through Bluetooth, Telegram, or another app.',
-                          ),
-                        ),
-                        trailing: _sharingApk
-                            ? const SizedBox.square(
-                                dimension: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
+        child: ParchmentBackdrop(
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                  children: [
+                    _SettingsHero(appLanguage: _appLanguage),
+                    const SizedBox(height: 20),
+                    _SettingsSection(
+                      title: _ui(amharic: 'መተግበሪያ', english: 'Application'),
+                      icon: Icons.language_rounded,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _ui(
+                                  amharic: 'የመተግበሪያ ቋንቋ',
+                                  english: 'App language',
                                 ),
-                              )
-                            : const Icon(Icons.ios_share_rounded),
-                        onTap: _sharingApk ? null : _shareApk,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(72, 0, 16, 14),
-                        child: Text(
-                          _ui(
-                            amharic:
-                                'ተቀባዩ APKውን ለመጫን “ከዚህ ምንጭ ፍቀድ” ማብራት ሊኖርበት ይችላል።',
-                            english:
-                                'The receiver may need to allow installation from that sharing app.',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _ui(
+                                  amharic: 'የማውጫዎችንና የመቆጣጠሪያዎችን ቋንቋ ይቀይሩ።',
+                                  english:
+                                      'Change the language of menus and controls.',
+                                ),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              const SizedBox(height: 14),
+                              SizedBox(
+                                width: double.infinity,
+                                child: SegmentedButton<AppLanguage>(
+                                  segments: const [
+                                    ButtonSegment(
+                                      value: AppLanguage.amharic,
+                                      icon: Icon(Icons.translate_rounded),
+                                      label: Text('አማርኛ'),
+                                    ),
+                                    ButtonSegment(
+                                      value: AppLanguage.english,
+                                      icon: Icon(Icons.language_rounded),
+                                      label: Text('English'),
+                                    ),
+                                  ],
+                                  selected: {_appLanguage},
+                                  onSelectionChanged: _setAppLanguage,
+                                ),
+                              ),
+                            ],
                           ),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppTheme.sacredRed),
                         ),
-                      ),
-                      const Divider(indent: 72),
-                      ListTile(
-                        leading: const _SettingIcon(
-                          icon: Icons.delete_outline_rounded,
-                        ),
-                        title: Text(
-                          _ui(
-                            amharic: 'የቅርብ ንባብ ያጥፉ',
-                            english: 'Clear recent reading',
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsSection(
+                      title: _ui(amharic: 'የንባብ ቅንብር', english: 'Reader'),
+                      icon: Icons.auto_stories_rounded,
+                      children: [
+                        ListTile(
+                          leading: const _SettingIcon(
+                            icon: Icons.menu_book_rounded,
+                          ),
+                          title: Text(
+                            _ui(
+                              amharic: 'የጽሑፍ ቋንቋ',
+                              english: 'Content language',
+                            ),
+                          ),
+                          subtitle: Text(
+                            _ui(
+                              amharic: 'በአንባቢው ውስጥ የሚታየውን ጽሑፍ ይምረጡ።',
+                              english:
+                                  'Choose the text displayed in the reader.',
+                            ),
+                          ),
+                          trailing: DropdownButton<ReaderLanguage>(
+                            value: _preferences.language,
+                            underline: const SizedBox.shrink(),
+                            onChanged: _setReaderLanguage,
+                            items: ReaderLanguage.values.map((language) {
+                              return DropdownMenuItem(
+                                value: language,
+                                child: Text(_readerLanguageLabel(language)),
+                              );
+                            }).toList(),
                           ),
                         ),
-                        subtitle: Text(
-                          _ui(
-                            amharic: 'የንባብ ታሪክዎን ከዚህ መሣሪያ ያስወግዱ።',
-                            english:
-                                'Remove your reading history from this device.',
+                        const Divider(indent: 72),
+                        ListTile(
+                          leading: const _SettingIcon(
+                            icon: Icons.format_size_rounded,
+                          ),
+                          title: Text(
+                            _ui(amharic: 'የፊደል መጠን', english: 'Text size'),
+                          ),
+                          subtitle: Slider(
+                            value: _textScales
+                                .indexOf(_preferences.textScale)
+                                .toDouble(),
+                            min: 0,
+                            max: (_textScales.length - 1).toDouble(),
+                            divisions: _textScales.length - 1,
+                            label: percent,
+                            onChanged: _setTextScale,
+                          ),
+                          trailing: Text(
+                            percent,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
-                        onTap: _clearHistory,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                        const Divider(indent: 72),
+                        SwitchListTile(
+                          secondary: const _SettingIcon(
+                            icon: Icons.auto_awesome_rounded,
+                            color: AppTheme.sacredRed,
+                          ),
+                          title: Text(
+                            _ui(
+                              amharic: 'ቅዱሳት ስሞችን በቀይ',
+                              english: 'Sacred names in red',
+                            ),
+                          ),
+                          subtitle: Text(
+                            _ui(
+                              amharic: 'የእግዚአብሔርንና የቅዱሳንን ስም ያጉሉ።',
+                              english:
+                                  'Highlight divine and saint names while reading.',
+                            ),
+                          ),
+                          value: _preferences.highlightSacredNames,
+                          onChanged: _setSacredNames,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsSection(
+                      title: _ui(amharic: 'ከመስመር ውጭ', english: 'Offline'),
+                      icon: Icons.offline_pin_rounded,
+                      children: [
+                        ListTile(
+                          leading: const _SettingIcon(
+                            icon: Icons.download_done_rounded,
+                            color: AppTheme.controlGreen,
+                          ),
+                          title: Text(
+                            _ui(
+                              amharic: 'ከመስመር ውጭ ይጠቀሙ',
+                              english: 'Available offline',
+                            ),
+                          ),
+                          subtitle: Text(
+                            _ui(
+                              amharic: 'የተቀመጠ ጽሑፍና የወረደ ድምፅ ያለ በይነመረብ ይሠራል።',
+                              english:
+                                  'Saved text and downloaded audio work without internet.',
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.check_circle_rounded,
+                            color: AppTheme.controlGreen,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsSection(
+                      title: _ui(amharic: 'ማጋራትና ውሂብ', english: 'Share & data'),
+                      icon: Icons.hub_outlined,
+                      children: [
+                        ListTile(
+                          leading: const _SettingIcon(
+                            icon: Icons.android_rounded,
+                            color: AppTheme.controlGreen,
+                          ),
+                          title: Text(
+                            _ui(
+                              amharic: 'መተግበሪያውን እንደ APK ያጋሩ',
+                              english: 'Share the app as an APK',
+                            ),
+                          ),
+                          subtitle: Text(
+                            _ui(
+                              amharic:
+                                  'የተጫነውን APK በBluetooth፣ Telegram ወይም በሌላ መተግበሪያ ይላኩ።',
+                              english:
+                                  'Send the installed APK through Bluetooth, Telegram, or another app.',
+                            ),
+                          ),
+                          trailing: _sharingApk
+                              ? const SizedBox.square(
+                                  dimension: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Icon(Icons.ios_share_rounded),
+                          onTap: _sharingApk ? null : _shareApk,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(72, 0, 16, 14),
+                          child: Text(
+                            _ui(
+                              amharic:
+                                  'ተቀባዩ APKውን ለመጫን “ከዚህ ምንጭ ፍቀድ” ማብራት ሊኖርበት ይችላል።',
+                              english:
+                                  'The receiver may need to allow installation from that sharing app.',
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppTheme.sacredRed),
+                          ),
+                        ),
+                        const Divider(indent: 72),
+                        ListTile(
+                          leading: const _SettingIcon(
+                            icon: Icons.delete_outline_rounded,
+                          ),
+                          title: Text(
+                            _ui(
+                              amharic: 'የቅርብ ንባብ ያጥፉ',
+                              english: 'Clear recent reading',
+                            ),
+                          ),
+                          subtitle: Text(
+                            _ui(
+                              amharic: 'የንባብ ታሪክዎን ከዚህ መሣሪያ ያስወግዱ።',
+                              english:
+                                  'Remove your reading history from this device.',
+                            ),
+                          ),
+                          onTap: _clearHistory,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
@@ -512,12 +519,7 @@ class _SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppTheme.parchmentSurface,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppTheme.warmOutline.withValues(alpha: 0.45)),
-      ),
+    return GlassSurface(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
