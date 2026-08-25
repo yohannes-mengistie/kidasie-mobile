@@ -1,11 +1,11 @@
 {
   "data": {
     "liturgy": {
-      "id": 24,
+      "id": 44,
       "slug": "st-cyril",
       "name": "Anaphora of St. Cyril",
       "name_am": "የቅዱስ ኩርሎስ ቅዳሴ",
-      "content_version": 4,
+      "content_version": 2,
       "has_content": false
     },
     "sections": []

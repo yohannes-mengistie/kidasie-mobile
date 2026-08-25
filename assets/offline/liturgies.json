@@ -2,78 +2,78 @@
   "data": [
     {
       "id": 1,
-      "slug": "apostles",
-      "name": "Anaphora of the Apostles",
-      "name_am": "የሐዋርያት ቅዳሴ",
-      "content_version": 1281,
-      "has_content": true
-    },
-    {
-      "id": 8,
       "slug": "st-mary",
       "name": "Anaphora of St. Mary",
       "name_am": "የእመቤታችን የድንግል ማርያም ቅዳሴ",
-      "content_version": 972,
+      "content_version": 1945,
+      "has_content": true
+    },
+    {
+      "id": 4,
+      "slug": "apostles",
+      "name": "Anaphora of the Apostles",
+      "name_am": "የሐዋርያት ቅዳሴ",
+      "content_version": 2135,
+      "has_content": true
+    },
+    {
+      "id": 5,
+      "slug": "our-lord-jesus-christ",
+      "name": "Anaphora of Our Lord Jesus Christ",
+      "name_am": "የጌታችን የኢየሱስ ክርስቶስ ቅዳሴ",
+      "content_version": 1404,
+      "has_content": true
+    },
+    {
+      "id": 6,
+      "slug": "st-athanasius",
+      "name": "Anaphora of St. Athanasius",
+      "name_am": "የቅዱስ አትናቴዎስ ቅዳሴ",
+      "content_version": 2657,
       "has_content": true
     },
     {
       "id": 10,
-      "slug": "our-lord-jesus-christ",
-      "name": "Anaphora of Our Lord Jesus Christ",
-      "name_am": "የጌታችን የኢየሱስ ክርስቶስ ቅዳሴ",
-      "content_version": 702,
+      "slug": "st-epiphanius",
+      "name": "Anaphora of St. Epiphanius",
+      "name_am": "የቅዱስ ኤጲፋንዮስ ቅዳሴ",
+      "content_version": 2912,
       "has_content": true
     },
     {
       "id": 11,
-      "slug": "st-athanasius",
-      "name": "Anaphora of St. Athanasius",
-      "name_am": "የቅዱስ አትናቴዎስ ቅዳሴ",
-      "content_version": 1328,
+      "slug": "st-john-chrysostom",
+      "name": "Anaphora of St. John Chrysostom",
+      "name_am": "የቅዱስ ዮሐንስ አፈወርቅ ቅዳሴ",
+      "content_version": 2179,
+      "has_content": true
+    },
+    {
+      "id": 12,
+      "slug": "st-dioscorus",
+      "name": "Anaphora of St. Dioscorus",
+      "name_am": "የቅዱስ ዲዮስቆሮስ ቅዳሴ",
+      "content_version": 1445,
+      "has_content": true
+    },
+    {
+      "id": 13,
+      "slug": "st-dioscorus-fasika-pentecost",
+      "name": "St. Dioscorus for Fasika and Pentecost",
+      "name_am": "የቅዱስ ዲዮስቆሮስ የፋሲካና የጰራቅሊጦስ ቅዳሴ",
+      "content_version": 2923,
+      "has_content": true
+    },
+    {
+      "id": 14,
+      "slug": "st-gregory",
+      "name": "Anaphora of St. Gregory",
+      "name_am": "የቅዱስ ጎርጎርዮስ ቅዳሴ",
+      "content_version": 2253,
       "has_content": true
     },
     {
       "id": 15,
-      "slug": "st-epiphanius",
-      "name": "Anaphora of St. Epiphanius",
-      "name_am": "የቅዱስ ኤጲፋንዮስ ቅዳሴ",
-      "content_version": 1165,
-      "has_content": true
-    },
-    {
-      "id": 16,
-      "slug": "st-john-chrysostom",
-      "name": "Anaphora of St. John Chrysostom",
-      "name_am": "የቅዱስ ዮሐንስ አፈወርቅ ቅዳሴ",
-      "content_version": 871,
-      "has_content": true
-    },
-    {
-      "id": 17,
-      "slug": "st-dioscorus",
-      "name": "Anaphora of St. Dioscorus",
-      "name_am": "የቅዱስ ዲዮስቆሮስ ቅዳሴ",
-      "content_version": 721,
-      "has_content": true
-    },
-    {
-      "id": 18,
-      "slug": "st-dioscorus-fasika-pentecost",
-      "name": "St. Dioscorus for Fasika and Pentecost",
-      "name_am": "የቅዱስ ዲዮስቆሮስ የፋሲካና የጰራቅሊጦስ ቅዳሴ",
-      "content_version": 1167,
-      "has_content": true
-    },
-    {
-      "id": 19,
-      "slug": "st-gregory",
-      "name": "Anaphora of St. Gregory",
-      "name_am": "የቅዱስ ጎርጎርዮስ ቅዳሴ",
-      "content_version": 901,
-      "has_content": true
-    },
-    {
-      "id": 20,
       "slug": "liturgy-guide",
       "name": "Introduction to the Divine Liturgy",
       "name_am": "የሥርዓተ ቅዳሴ መግቢያ",
@@ -81,35 +81,35 @@
       "has_content": true
     },
     {
-      "id": 22,
+      "id": 42,
       "slug": "st-basil",
       "name": "Anaphora of St. Basil",
       "name_am": "የቅዱስ ባስልዮስ ቅዳሴ",
-      "content_version": 4,
+      "content_version": 2,
       "has_content": false
     },
     {
-      "id": 23,
+      "id": 43,
       "slug": "three-hundred",
       "name": "Anaphora of the Three Hundred and Eighteen Fathers",
       "name_am": "የ፫ መቶ ፲፰ ቅዱሳን አበው ቅዳሴ",
-      "content_version": 4,
+      "content_version": 2,
       "has_content": false
     },
     {
-      "id": 24,
+      "id": 44,
       "slug": "st-cyril",
       "name": "Anaphora of St. Cyril",
       "name_am": "የቅዱስ ኩርሎስ ቅዳሴ",
-      "content_version": 4,
+      "content_version": 2,
       "has_content": false
     },
     {
-      "id": 25,
+      "id": 45,
       "slug": "st-jacob-of-serough",
       "name": "Anaphora of St. Jacob of Serough",
       "name_am": "የቅዱስ ያዕቆብ ዘሥሩግ ቅዳሴ",
-      "content_version": 4,
+      "content_version": 2,
       "has_content": false
     }
   ]

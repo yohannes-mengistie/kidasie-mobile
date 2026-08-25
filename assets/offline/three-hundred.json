@@ -1,11 +1,11 @@
 {
   "data": {
     "liturgy": {
-      "id": 23,
+      "id": 43,
       "slug": "three-hundred",
       "name": "Anaphora of the Three Hundred and Eighteen Fathers",
       "name_am": "የ፫ መቶ ፲፰ ቅዱሳን አበው ቅዳሴ",
-      "content_version": 4,
+      "content_version": 2,
       "has_content": false
     },
     "sections": []
