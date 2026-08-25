@@ -155,38 +155,41 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
           return _buildEmpty();
         }
 
-        return RefreshIndicator(
-          onRefresh: _viewModel.synchronizeContent,
-          child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: _viewModel.liturgies.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 18),
-                  child: _buildHero(),
-                );
-              }
-
-              final liturgy = _viewModel.liturgies[index - 1];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildLiturgyCard(liturgy, index),
-              );
-            },
-          ),
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
+              child: _buildHero(),
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _viewModel.synchronizeContent,
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: _viewModel.liturgies.length,
+                  itemBuilder: (context, index) {
+                    final liturgy = _viewModel.liturgies[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildLiturgyCard(liturgy, index + 1),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
         );
     }
   }
 
   Widget _buildHero() {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(30),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 17),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -197,66 +200,107 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(30),
             border: Border.all(
-              color: AppTheme.warmOutline.withValues(alpha: 0.5),
+              color: AppTheme.liturgicalGold.withValues(alpha: 0.46),
+              width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.controlGreen.withValues(alpha: 0.12),
-                blurRadius: 30,
-                offset: const Offset(0, 12),
+                color: AppTheme.liturgicalGold.withValues(alpha: 0.13),
+                blurRadius: 24,
+                offset: const Offset(0, 9),
               ),
             ],
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              Container(
-                width: 54,
-                height: 54,
-                decoration: BoxDecoration(
-                  color: AppTheme.controlGreen.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: AppTheme.controlGreen.withValues(alpha: 0.2),
+              Positioned(
+                right: -2,
+                top: -30,
+                child: IgnorePointer(
+                  child: Text(
+                    '✠',
+                    style: TextStyle(
+                      color: AppTheme.sacredRed.withValues(alpha: 0.07),
+                      fontSize: 94,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-                child: const Icon(
-                  Icons.auto_stories_rounded,
-                  color: AppTheme.controlGreen,
-                  size: 30,
-                ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _ui(
-                        amharic: 'የቅዳሴ መጻሕፍት',
-                        english: 'Divine Liturgy Library',
-                      ),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppTheme.inkBlack,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _ui(
-                        amharic: 'በግዕዝና በአማርኛ ያንብቡ፤ ሙሉ ድምፁንም ያዳምጡ።',
-                        english:
-                            'Read in Ge\'ez and Amharic, and listen to complete recordings.',
-                      ),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.inkBlack.withValues(alpha: 0.72),
-                        height: 1.45,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 4,
+                    height: 76,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      gradient: const LinearGradient(
+                        colors: [AppTheme.sacredRed, AppTheme.liturgicalGold],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    width: 56,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppTheme.controlGreen.withValues(alpha: 0.15),
+                          AppTheme.liturgicalGold.withValues(alpha: 0.1),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(19),
+                      border: Border.all(
+                        color: AppTheme.liturgicalGold.withValues(alpha: 0.32),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.auto_stories_rounded,
+                      color: AppTheme.controlGreen,
+                      size: 31,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _ui(
+                            amharic: 'የቅዳሴ መጻሕፍት',
+                            english: 'Divine Liturgy Library',
+                          ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: AppTheme.inkBlack,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          _ui(
+                            amharic: 'በግዕዝና በአማርኛ ያንብቡ፤ ሙሉ ድምፁንም ያዳምጡ።',
+                            english:
+                                'Read in Ge\'ez and Amharic, and listen to complete recordings.',
+                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: AppTheme.inkBlack.withValues(
+                                  alpha: 0.72,
+                                ),
+                                height: 1.4,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
