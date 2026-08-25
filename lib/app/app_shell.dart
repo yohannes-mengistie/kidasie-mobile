@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'theme/app_theme.dart';
 import '../core/history/reading_history.dart';
 import '../core/localization/app_language.dart';
 import '../core/preferences/reader_preferences.dart';
+import '../core/widgets/glass_surface.dart';
 import '../features/history/presentation/recent_screen.dart';
 import '../features/liturgies/data/liturgy_repository.dart';
 import '../features/liturgies/presentation/liturgy_list_screen.dart';
@@ -68,33 +70,53 @@ class _AppShellState extends State<AppShell> {
           ),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.auto_stories_outlined),
-            selectedIcon: const Icon(Icons.auto_stories_rounded),
-            label: widget.appLanguage.text(amharic: 'ቅዳሴ', english: 'Liturgy'),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(14, 4, 14, 10),
+        child: GlassSurface(
+          borderRadius: 30,
+          color: AppTheme.parchmentSurface.withValues(alpha: 0.76),
+          child: NavigationBar(
+            height: 68,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            indicatorColor: AppTheme.controlGreen.withValues(alpha: 0.14),
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            destinations: [
+              NavigationDestination(
+                icon: const Icon(Icons.auto_stories_outlined),
+                selectedIcon: const Icon(Icons.auto_stories_rounded),
+                label: widget.appLanguage.text(
+                  amharic: 'ቅዳሴ',
+                  english: 'Liturgy',
+                ),
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.history_outlined),
+                selectedIcon: const Icon(Icons.history_rounded),
+                label: widget.appLanguage.text(
+                  amharic: 'የቅርብ',
+                  english: 'Recent',
+                ),
+              ),
+              NavigationDestination(
+                icon: const Icon(Icons.tune_outlined),
+                selectedIcon: const Icon(Icons.tune_rounded),
+                label: widget.appLanguage.text(
+                  amharic: 'ቅንብር',
+                  english: 'Settings',
+                ),
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.history_outlined),
-            selectedIcon: const Icon(Icons.history_rounded),
-            label: widget.appLanguage.text(amharic: 'የቅርብ', english: 'Recent'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.tune_outlined),
-            selectedIcon: const Icon(Icons.tune_rounded),
-            label: widget.appLanguage.text(
-              amharic: 'ቅንብር',
-              english: 'Settings',
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

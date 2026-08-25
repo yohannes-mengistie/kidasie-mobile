@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -448,56 +449,171 @@ class _SettingsHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppTheme.controlGreen, Color(0xFF204231)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 17),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppTheme.parchmentSurface.withValues(alpha: 0.97),
+                const Color(0xFFE8E4CD).withValues(alpha: 0.95),
+                const Color(0xFFD5DDC5).withValues(alpha: 0.94),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: AppTheme.liturgicalGold.withValues(alpha: 0.46),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.liturgicalGold.withValues(alpha: 0.13),
+                blurRadius: 24,
+                offset: const Offset(0, 9),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -2,
+                top: -30,
+                child: IgnorePointer(
+                  child: Text(
+                    '✠',
+                    style: TextStyle(
+                      color: AppTheme.sacredRed.withValues(alpha: 0.07),
+                      fontSize: 94,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 4,
+                    height: 108,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      gradient: const LinearGradient(
+                        colors: [AppTheme.sacredRed, AppTheme.liturgicalGold],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 13),
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: AppTheme.controlGreen.withValues(alpha: 0.11),
+                      borderRadius: BorderRadius.circular(17),
+                      border: Border.all(
+                        color: AppTheme.controlGreen.withValues(alpha: 0.22),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.tune_rounded,
+                      color: AppTheme.controlGreen,
+                      size: 27,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          appLanguage.text(
+                            amharic: 'የእርስዎ የንባብ ልምድ',
+                            english: 'Your reading experience',
+                          ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: AppTheme.inkBlack,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          appLanguage.text(
+                            amharic: 'ቋንቋን፣ ጽሑፍንና ከመስመር ውጭ አጠቃቀምን ያስተካክሉ።',
+                            english:
+                                'Personalize language, text, and offline access.',
+                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                        ),
+                        const SizedBox(height: 11),
+                        Wrap(
+                          spacing: 7,
+                          runSpacing: 7,
+                          children: [
+                            _SettingsHeroPill(
+                              icon: Icons.translate_rounded,
+                              label: appLanguage.isEnglish ? 'English' : 'አማርኛ',
+                            ),
+                            _SettingsHeroPill(
+                              icon: Icons.offline_pin_rounded,
+                              label: appLanguage.text(
+                                amharic: 'ከመስመር ውጭ ዝግጁ',
+                                english: 'Offline ready',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        borderRadius: BorderRadius.circular(24),
+      ),
+    );
+  }
+}
+
+class _SettingsHeroPill extends StatelessWidget {
+  const _SettingsHeroPill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.48),
+        borderRadius: BorderRadius.circular(99),
+        border: Border.all(
+          color: AppTheme.controlGreen.withValues(alpha: 0.14),
+        ),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.tune_rounded,
-              color: AppTheme.parchmentSurface,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  appLanguage.text(
-                    amharic: 'የእርስዎ የንባብ ልምድ',
-                    english: 'Your reading experience',
-                  ),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.parchmentSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  appLanguage.text(
-                    amharic: 'ቋንቋን፣ ጽሑፍንና ከመስመር ውጭ አጠቃቀምን ያስተካክሉ።',
-                    english: 'Personalize language, text, and offline access.',
-                  ),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.parchmentSurface.withValues(alpha: 0.82),
-                  ),
-                ),
-              ],
+          Icon(icon, size: 14, color: AppTheme.controlGreen),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppTheme.controlGreen,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -520,6 +636,7 @@ class _SettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassSurface(
+      color: AppTheme.parchmentSurface.withValues(alpha: 0.68),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

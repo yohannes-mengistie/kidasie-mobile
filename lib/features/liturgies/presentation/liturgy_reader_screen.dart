@@ -42,6 +42,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   ReaderLanguage _selectedLanguage = ReaderLanguage.all;
   double _textScale = 1;
   bool _highlightSacredNames = true;
+  bool _audioPlayerMinimized = false;
   int _currentPageIndex = 0;
 
   String _ui({required String amharic, required String english}) {
@@ -92,6 +93,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
       return;
     }
 
+    _audioPlayerMinimized = false;
     current?.dispose();
     _audioController = audio == null
         ? null
@@ -288,9 +290,19 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
           bottom: 12,
           child: SafeArea(
             top: false,
-            child: LiturgyAudioPlayer(
-              controller: controller,
-              appLanguage: widget.appLanguage,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              child: LiturgyAudioPlayer(
+                key: ValueKey(_audioPlayerMinimized),
+                controller: controller,
+                appLanguage: widget.appLanguage,
+                isMinimized: _audioPlayerMinimized,
+                onMinimizedChanged: (value) {
+                  setState(() => _audioPlayerMinimized = value);
+                },
+              ),
             ),
           ),
         ),
@@ -481,12 +493,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
         key: PageStorageKey<String>(
           'reader-${page.section.id}-${page.sourcePage ?? index}',
         ),
-        padding: EdgeInsets.fromLTRB(
-          20,
-          8,
-          20,
-          _audioController == null ? 28 : 176,
-        ),
+        padding: EdgeInsets.fromLTRB(20, 8, 20, _audioBottomPadding),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           if (page.showSectionHeader) _buildSectionHeader(page.section),
@@ -718,7 +725,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
           24,
           24,
           24,
-          _audioController == null ? 24 : 176,
+          _audioController == null ? 24 : _audioBottomPadding,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -755,6 +762,13 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
         ),
       ),
     );
+  }
+
+  double get _audioBottomPadding {
+    if (_audioController == null) {
+      return 28;
+    }
+    return _audioPlayerMinimized ? 96 : 176;
   }
 
   String _roleLabel(String role) {

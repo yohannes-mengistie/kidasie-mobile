@@ -11,11 +11,15 @@ class LiturgyAudioPlayer extends StatefulWidget {
   const LiturgyAudioPlayer({
     required this.controller,
     required this.appLanguage,
+    required this.isMinimized,
+    required this.onMinimizedChanged,
     super.key,
   });
 
   final LiturgyAudioController controller;
   final AppLanguage appLanguage;
+  final bool isMinimized;
+  final ValueChanged<bool> onMinimizedChanged;
 
   @override
   State<LiturgyAudioPlayer> createState() => _LiturgyAudioPlayerState();
@@ -42,6 +46,9 @@ class _LiturgyAudioPlayerState extends State<LiturgyAudioPlayer> {
         final value = (_dragPositionMs ?? controller.position.inMilliseconds)
             .clamp(0, maximum.toInt())
             .toDouble();
+        if (widget.isMinimized) {
+          return _buildMinimized(context, controller);
+        }
 
         return ClipRRect(
           borderRadius: BorderRadius.circular(24),
@@ -122,6 +129,14 @@ class _LiturgyAudioPlayerState extends State<LiturgyAudioPlayer> {
                             ),
                           ],
                         ),
+                      ),
+                      IconButton(
+                        tooltip: _ui(
+                          amharic: 'የድምፅ መቆጣጠሪያውን አሳንስ',
+                          english: 'Minimize audio controls',
+                        ),
+                        onPressed: () => widget.onMinimizedChanged(true),
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
                       ),
                       PopupMenuButton<double>(
                         initialValue: controller.speed,
@@ -252,6 +267,141 @@ class _LiturgyAudioPlayerState extends State<LiturgyAudioPlayer> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildMinimized(
+    BuildContext context,
+    LiturgyAudioController controller,
+  ) {
+    final duration = controller.duration;
+    final progress = duration.inMilliseconds <= 0
+        ? 0.0
+        : (controller.position.inMilliseconds / duration.inMilliseconds).clamp(
+            0.0,
+            1.0,
+          );
+
+    return Align(
+      alignment: AlignmentDirectional.bottomEnd,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 296),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(9, 8, 7, 7),
+              decoration: BoxDecoration(
+                color: AppTheme.parchmentSurface.withValues(alpha: 0.88),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.74)),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.inkBlack.withValues(alpha: 0.14),
+                    blurRadius: 24,
+                    offset: const Offset(0, 9),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      SizedBox.square(
+                        dimension: 42,
+                        child: IconButton.filled(
+                          tooltip: controller.playing
+                              ? _ui(amharic: 'አቁም', english: 'Pause')
+                              : _ui(amharic: 'አጫውት', english: 'Play'),
+                          onPressed: controller.isBuffering
+                              ? null
+                              : () => unawaited(controller.togglePlayback()),
+                          icon: controller.isBuffering
+                              ? const SizedBox.square(
+                                  dimension: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.4,
+                                  ),
+                                )
+                              : Icon(
+                                  controller.playing
+                                      ? Icons.pause_rounded
+                                      : Icons.play_arrow_rounded,
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _ui(
+                                amharic: 'የቅዳሴ ድምፅ',
+                                english: 'Liturgy audio',
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${_format(controller.position)} / ${_format(duration)}',
+                              maxLines: 1,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: _ui(
+                          amharic: 'የድምፅ መቆጣጠሪያውን አስፋ',
+                          english: 'Expand audio controls',
+                        ),
+                        onPressed: () => widget.onMinimizedChanged(false),
+                        icon: const Icon(Icons.keyboard_arrow_up_rounded),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(99),
+                    child: LinearProgressIndicator(
+                      value: controller.isBuffering ? null : progress,
+                      minHeight: 3,
+                      backgroundColor: AppTheme.liturgicalGold.withValues(
+                        alpha: 0.14,
+                      ),
+                      color: controller.errorMessage == null
+                          ? AppTheme.controlGreen
+                          : Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  if (controller.isDownloading)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: LinearProgressIndicator(
+                        value: controller.downloadProgress == 0
+                            ? null
+                            : controller.downloadProgress,
+                        minHeight: 2,
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
