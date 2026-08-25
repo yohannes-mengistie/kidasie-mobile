@@ -190,17 +190,20 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                AppTheme.controlGreen.withValues(alpha: 0.94),
-                const Color(0xFF254A38).withValues(alpha: 0.88),
+                AppTheme.parchmentSurface.withValues(alpha: 0.97),
+                const Color(0xFFE8E4CD).withValues(alpha: 0.95),
+                const Color(0xFFD5DDC5).withValues(alpha: 0.94),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+            border: Border.all(
+              color: AppTheme.warmOutline.withValues(alpha: 0.5),
+            ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.controlGreen.withValues(alpha: 0.2),
+                color: AppTheme.controlGreen.withValues(alpha: 0.12),
                 blurRadius: 30,
                 offset: const Offset(0, 12),
               ),
@@ -213,12 +216,15 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
                 width: 54,
                 height: 54,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.14),
+                  color: AppTheme.controlGreen.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: AppTheme.controlGreen.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: const Icon(
                   Icons.auto_stories_rounded,
-                  color: AppTheme.parchmentSurface,
+                  color: AppTheme.controlGreen,
                   size: 30,
                 ),
               ),
@@ -233,7 +239,7 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
                         english: 'Divine Liturgy Library',
                       ),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppTheme.parchmentSurface,
+                        color: AppTheme.inkBlack,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -245,9 +251,7 @@ class _LiturgyListScreenState extends State<LiturgyListScreen> {
                             'Read in Ge\'ez and Amharic, and listen to complete recordings.',
                       ),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.parchmentSurface.withValues(
-                          alpha: 0.84,
-                        ),
+                        color: AppTheme.inkBlack.withValues(alpha: 0.72),
                         height: 1.45,
                       ),
                     ),
