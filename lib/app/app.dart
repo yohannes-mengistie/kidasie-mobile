@@ -7,6 +7,10 @@ import 'package:orthodox_liturgy/core/config/app_config.dart';
 import 'package:orthodox_liturgy/core/history/reading_history.dart';
 import 'package:orthodox_liturgy/core/localization/app_language.dart';
 import 'package:orthodox_liturgy/core/preferences/reader_preferences.dart';
+import 'package:orthodox_liturgy/features/announcements/data/announcement_api_service.dart';
+import 'package:orthodox_liturgy/features/announcements/data/announcement_local_data_source.dart';
+import 'package:orthodox_liturgy/features/announcements/data/announcement_read_store.dart';
+import 'package:orthodox_liturgy/features/announcements/data/announcement_repository.dart';
 import 'package:orthodox_liturgy/features/liturgies/data/liturgy_api_service.dart';
 import 'package:orthodox_liturgy/features/liturgies/data/liturgy_local_data_source.dart';
 import 'package:orthodox_liturgy/features/liturgies/data/liturgy_repository.dart';
@@ -26,6 +30,8 @@ class _KidasieAppState extends State<KidasieApp> {
   late final LiturgyRepository _liturgyRepository;
   late final ReaderPreferencesStore _readerPreferencesStore;
   late final ReadingHistoryStore _historyStore;
+  late final AnnouncementRepository _announcementRepository;
+  late final AnnouncementReadStore _announcementReadStore;
 
   AppLanguage _appLanguage = AppLanguage.amharic;
 
@@ -43,6 +49,14 @@ class _KidasieAppState extends State<KidasieApp> {
     );
     _readerPreferencesStore = ReaderPreferencesStore();
     _historyStore = ReadingHistoryStore();
+    _announcementRepository = AnnouncementRepository(
+      apiService: AnnouncementApiService(
+        client: _httpClient,
+        baseUrl: AppConfig.apiBaseUri,
+      ),
+      localDataSource: AnnouncementLocalDataSource(),
+    );
+    _announcementReadStore = AnnouncementReadStore();
     unawaited(_loadAppLanguage());
   }
 
@@ -90,6 +104,8 @@ class _KidasieAppState extends State<KidasieApp> {
         repository: _liturgyRepository,
         preferencesStore: _readerPreferencesStore,
         historyStore: _historyStore,
+        announcementRepository: _announcementRepository,
+        announcementReadStore: _announcementReadStore,
         appLanguage: _appLanguage,
         onAppLanguageChanged: _setAppLanguage,
       ),

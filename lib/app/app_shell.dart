@@ -5,7 +5,9 @@ import '../core/history/reading_history.dart';
 import '../core/localization/app_language.dart';
 import '../core/preferences/reader_preferences.dart';
 import '../core/widgets/glass_surface.dart';
-import '../features/history/presentation/recent_screen.dart';
+import '../features/announcements/data/announcement_read_store.dart';
+import '../features/announcements/data/announcement_repository.dart';
+import '../features/announcements/presentation/announcement_screen.dart';
 import '../features/liturgies/data/liturgy_repository.dart';
 import '../features/liturgies/presentation/liturgy_list_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
@@ -15,6 +17,8 @@ class AppShell extends StatefulWidget {
     required this.repository,
     required this.preferencesStore,
     required this.historyStore,
+    required this.announcementRepository,
+    required this.announcementReadStore,
     required this.appLanguage,
     required this.onAppLanguageChanged,
     super.key,
@@ -23,6 +27,8 @@ class AppShell extends StatefulWidget {
   final LiturgyRepository repository;
   final ReaderPreferencesStore preferencesStore;
   final ReadingHistoryStore historyStore;
+  final AnnouncementRepository announcementRepository;
+  final AnnouncementReadStore announcementReadStore;
   final AppLanguage appLanguage;
   final ValueChanged<AppLanguage> onAppLanguageChanged;
 
@@ -32,12 +38,10 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _selectedIndex = 0;
-  int _historyRevision = 0;
+  int _announcementUnreadCount = 0;
 
   void _historyChanged() {
-    setState(() {
-      _historyRevision++;
-    });
+    // Reading history remains available to reader features and Settings.
   }
 
   @override
@@ -53,13 +57,17 @@ class _AppShellState extends State<AppShell> {
             appLanguage: widget.appLanguage,
             onHistoryChanged: _historyChanged,
           ),
-          RecentScreen(
-            key: ValueKey(_historyRevision),
-            repository: widget.repository,
+          AnnouncementScreen(
+            repository: widget.announcementRepository,
+            readStore: widget.announcementReadStore,
+            liturgyRepository: widget.repository,
             preferencesStore: widget.preferencesStore,
             historyStore: widget.historyStore,
             appLanguage: widget.appLanguage,
-            onHistoryChanged: _historyChanged,
+            onUnreadCountChanged: (count) {
+              if (count == _announcementUnreadCount || !mounted) return;
+              setState(() => _announcementUnreadCount = count);
+            },
           ),
           SettingsScreen(
             preferencesStore: widget.preferencesStore,
@@ -99,11 +107,11 @@ class _AppShellState extends State<AppShell> {
                 ),
               ),
               NavigationDestination(
-                icon: const Icon(Icons.history_outlined),
-                selectedIcon: const Icon(Icons.history_rounded),
+                icon: _announcementIcon(selected: false),
+                selectedIcon: _announcementIcon(selected: true),
                 label: widget.appLanguage.text(
-                  amharic: 'የቅርብ',
-                  english: 'Recent',
+                  amharic: 'ማስታወቂያ',
+                  english: 'Notices',
                 ),
               ),
               NavigationDestination(
@@ -118,6 +126,17 @@ class _AppShellState extends State<AppShell> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _announcementIcon({required bool selected}) {
+    final icon = Icon(
+      selected ? Icons.notifications_rounded : Icons.notifications_none_rounded,
+    );
+    if (_announcementUnreadCount == 0) return icon;
+    return Badge.count(
+      count: _announcementUnreadCount > 99 ? 99 : _announcementUnreadCount,
+      child: icon,
     );
   }
 }
