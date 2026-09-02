@@ -34,7 +34,9 @@ final class LiturgyListViewModel extends ChangeNotifier {
     'st-cyril': 10,
     'st-jacob-of-serough': 11,
     'st-dioscorus': 12,
-    'st-dioscorus-fasika-pentecost': 13,
+    'st-gregory-second': 13,
+    'john-son-of-thunder': 14,
+    'st-dioscorus-fasika-pentecost': 15,
   };
 
   List<Liturgy> _sortLiturgies(List<Liturgy> liturgies) {
