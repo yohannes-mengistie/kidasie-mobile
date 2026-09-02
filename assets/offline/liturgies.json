@@ -5,15 +5,22 @@
       "slug": "st-mary",
       "name": "Anaphora of St. Mary",
       "name_am": "የእመቤታችን የድንግል ማርያም ቅዳሴ",
-      "content_version": 1945,
-      "has_content": true
+      "content_version": 2516,
+      "has_content": true,
+      "audio": {
+        "url": "https://github.com/yohannes-mengistie/kidasie-backend/releases/download/audio-v1/st-mary.m4a",
+        "duration_ms": 12790201,
+        "size_bytes": 79591062,
+        "mime_type": "audio/mp4",
+        "sha256": "66adf9b73e24b5cc56cb150e4cbc75f95d1249ec18f1710ccb8c734673cad1ba"
+      }
     },
     {
       "id": 4,
       "slug": "apostles",
       "name": "Anaphora of the Apostles",
       "name_am": "የሐዋርያት ቅዳሴ",
-      "content_version": 2135,
+      "content_version": 2737,
       "has_content": true
     },
     {
@@ -21,15 +28,22 @@
       "slug": "our-lord-jesus-christ",
       "name": "Anaphora of Our Lord Jesus Christ",
       "name_am": "የጌታችን የኢየሱስ ክርስቶስ ቅዳሴ",
-      "content_version": 1404,
-      "has_content": true
+      "content_version": 1887,
+      "has_content": true,
+      "audio": {
+        "url": "https://github.com/yohannes-mengistie/kidasie-backend/releases/download/audio-v1/our-lord-jesus-christ.m4a",
+        "duration_ms": 10451162,
+        "size_bytes": 64894507,
+        "mime_type": "audio/mp4",
+        "sha256": "faa31f95837efe4d6722beeb6349e6662b4b2845f9443efcaa012cb59274acdf"
+      }
     },
     {
       "id": 6,
       "slug": "st-athanasius",
       "name": "Anaphora of St. Athanasius",
       "name_am": "የቅዱስ አትናቴዎስ ቅዳሴ",
-      "content_version": 2657,
+      "content_version": 3221,
       "has_content": true
     },
     {
@@ -37,15 +51,22 @@
       "slug": "st-epiphanius",
       "name": "Anaphora of St. Epiphanius",
       "name_am": "የቅዱስ ኤጲፋንዮስ ቅዳሴ",
-      "content_version": 2912,
-      "has_content": true
+      "content_version": 3416,
+      "has_content": true,
+      "audio": {
+        "url": "https://github.com/yohannes-mengistie/kidasie-backend/releases/download/audio-v1/st-epiphanius.m4a",
+        "duration_ms": 10282330,
+        "size_bytes": 64035049,
+        "mime_type": "audio/mp4",
+        "sha256": "ecdeaeaa54e0d1648842b8ae61ffb164bc2fa06b918e5ca07e1829390216b828"
+      }
     },
     {
       "id": 11,
       "slug": "st-john-chrysostom",
       "name": "Anaphora of St. John Chrysostom",
       "name_am": "የቅዱስ ዮሐንስ አፈወርቅ ቅዳሴ",
-      "content_version": 2179,
+      "content_version": 2676,
       "has_content": true
     },
     {
@@ -53,8 +74,15 @@
       "slug": "st-dioscorus",
       "name": "Anaphora of St. Dioscorus",
       "name_am": "የቅዱስ ዲዮስቆሮስ ቅዳሴ",
-      "content_version": 1445,
-      "has_content": true
+      "content_version": 1920,
+      "has_content": true,
+      "audio": {
+        "url": "https://github.com/yohannes-mengistie/kidasie-backend/releases/download/audio-v1/st-dioscorus.m4a",
+        "duration_ms": 10123761,
+        "size_bytes": 63081029,
+        "mime_type": "audio/mp4",
+        "sha256": "bea2eec79f584c073ca0066113aa2caeea5e0abdde58424d655215f12ca6b0b8"
+      }
     },
     {
       "id": 13,
@@ -69,7 +97,7 @@
       "slug": "st-gregory",
       "name": "Anaphora of St. Gregory",
       "name_am": "የቅዱስ ጎርጎርዮስ ቅዳሴ",
-      "content_version": 2253,
+      "content_version": 2751,
       "has_content": true
     },
     {
@@ -85,32 +113,55 @@
       "slug": "st-basil",
       "name": "Anaphora of St. Basil",
       "name_am": "የቅዱስ ባስልዮስ ቅዳሴ",
-      "content_version": 2,
-      "has_content": false
+      "content_version": 537,
+      "has_content": true
     },
     {
       "id": 43,
       "slug": "three-hundred",
       "name": "Anaphora of the Three Hundred and Eighteen Fathers",
       "name_am": "የ፫ መቶ ፲፰ ቅዱሳን አበው ቅዳሴ",
-      "content_version": 2,
-      "has_content": false
+      "content_version": 551,
+      "has_content": true
     },
     {
       "id": 44,
       "slug": "st-cyril",
       "name": "Anaphora of St. Cyril",
-      "name_am": "የቅዱስ ኩርሎስ ቅዳሴ",
-      "content_version": 2,
-      "has_content": false
+      "name_am": "የቅዱስ ቄርሎስ ቅዳሴ",
+      "content_version": 997,
+      "has_content": true
     },
     {
       "id": 45,
       "slug": "st-jacob-of-serough",
       "name": "Anaphora of St. Jacob of Serough",
       "name_am": "የቅዱስ ያዕቆብ ዘሥሩግ ቅዳሴ",
-      "content_version": 2,
-      "has_content": false
+      "content_version": 494,
+      "has_content": true,
+      "audio": {
+        "url": "https://github.com/yohannes-mengistie/kidasie-backend/releases/download/audio-v1/st-jacob-of-serough.m4a",
+        "duration_ms": 11976806,
+        "size_bytes": 74430680,
+        "mime_type": "audio/mp4",
+        "sha256": "1e372b8b677f1058cf48cf5f587a357c814d95a6b76a2eda81e7300822ef3a34"
+      }
+    },
+    {
+      "id": 63,
+      "slug": "st-gregory-second",
+      "name": "Anaphora of St. Gregory II",
+      "name_am": "የቅዱስ ጎርጎርዮስ ካልዕ ቅዳሴ",
+      "content_version": 457,
+      "has_content": true
+    },
+    {
+      "id": 68,
+      "slug": "john-son-of-thunder",
+      "name": "Anaphora of St. John son of Thunder",
+      "name_am": "የቅዱስ ዮሐንስ ወልደ ነጐድጓድ ቅዳሴ",
+      "content_version": 512,
+      "has_content": true
     }
   ]
 }
