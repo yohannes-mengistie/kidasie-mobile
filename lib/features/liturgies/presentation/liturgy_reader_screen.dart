@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_theme.dart';
 import '../../../core/audio/liturgy_audio_controller.dart';
-import '../../../core/audio/liturgy_audio_player.dart';
+import '../../../core/audio/liturgy_audio_dock.dart';
 import '../../../core/localization/app_language.dart';
 import '../../../core/preferences/reader_preferences.dart';
 import '../../../core/sharing/app_share_service.dart';
@@ -42,7 +42,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   ReaderLanguage _selectedLanguage = ReaderLanguage.all;
   double _textScale = 1;
   bool _highlightSacredNames = true;
-  bool _audioPlayerMinimized = false;
+  bool _audioDockExpanded = false;
   int _currentPageIndex = 0;
 
   String _ui({required String amharic, required String english}) {
@@ -93,7 +93,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
       return;
     }
 
-    _audioPlayerMinimized = false;
+    _audioDockExpanded = false;
     current?.dispose();
     _audioController = audio == null
         ? null
@@ -271,42 +271,42 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
           );
         }
 
-        return _withAudioPlayer(_buildContent(content));
+        return _buildContent(content);
     }
   }
 
   Widget _withAudioPlayer(Widget child) {
-    final controller = _audioController;
-    if (controller == null) {
+    final dock = _buildAudioDock();
+    if (dock == null) {
       return child;
     }
 
-    return Stack(
+    return Column(
       children: [
-        Positioned.fill(child: child),
-        Positioned(
-          left: 12,
-          right: 12,
-          bottom: 12,
-          child: SafeArea(
-            top: false,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: LiturgyAudioPlayer(
-                key: ValueKey(_audioPlayerMinimized),
-                controller: controller,
-                appLanguage: widget.appLanguage,
-                isMinimized: _audioPlayerMinimized,
-                onMinimizedChanged: (value) {
-                  setState(() => _audioPlayerMinimized = value);
-                },
-              ),
-            ),
-          ),
-        ),
+        dock,
+        Expanded(child: child),
       ],
+    );
+  }
+
+  /// The audio dock, or null when this liturgy has no recording.
+  ///
+  /// [middle] rides in the dock's first row so the controls and the page
+  /// navigation share one strip instead of stacking.
+  Widget? _buildAudioDock({Widget? middle}) {
+    final controller = _audioController;
+    if (controller == null) {
+      return null;
+    }
+
+    return LiturgyAudioDock(
+      controller: controller,
+      appLanguage: widget.appLanguage,
+      expanded: _audioDockExpanded,
+      middle: middle,
+      onExpandedChanged: (value) {
+        setState(() => _audioDockExpanded = value);
+      },
     );
   }
 
@@ -336,7 +336,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
 
     return Column(
       children: [
-        _buildPagePicker(pages, selectedIndex),
+        _buildTopBar(pages, selectedIndex),
         Expanded(
           child: PageView.builder(
             controller: _pageController,
@@ -387,6 +387,16 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
     return pages;
   }
 
+  /// The strip above the pages: page navigation on its own, or sharing a row
+  /// with the audio controls when this liturgy has a recording.
+  Widget _buildTopBar(List<_ReaderPage> pages, int selectedIndex) {
+    final dock = _buildAudioDock(
+      middle: _buildPagePickerRow(pages, selectedIndex),
+    );
+
+    return dock ?? _buildPagePicker(pages, selectedIndex);
+  }
+
   Widget _buildPagePicker(List<_ReaderPage> pages, int selectedIndex) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -409,42 +419,52 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
               color: AppTheme.controlGreen,
             ),
             const SizedBox(width: 10),
-            Expanded(
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<int>(
-                  value: selectedIndex,
-                  isExpanded: true,
-                  menuMaxHeight: 420,
-                  borderRadius: BorderRadius.circular(18),
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                  onChanged: (index) {
-                    if (index != null) {
-                      _goToPage(index, pages.length);
-                    }
-                  },
-                  items: List.generate(pages.length, (index) {
-                    return DropdownMenuItem<int>(
-                      value: index,
-                      child: Text(
-                        _pageLabel(pages[index], index),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              '${selectedIndex + 1} / ${pages.length}',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
+            Expanded(child: _buildPagePickerRow(pages, selectedIndex)),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPagePickerRow(List<_ReaderPage> pages, int selectedIndex) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        Expanded(
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<int>(
+              value: selectedIndex,
+              isExpanded: true,
+              menuMaxHeight: 420,
+              borderRadius: BorderRadius.circular(18),
+              icon: const Icon(Icons.keyboard_arrow_down_rounded),
+              onChanged: (index) {
+                if (index != null) {
+                  _goToPage(index, pages.length);
+                }
+              },
+              items: List.generate(pages.length, (index) {
+                return DropdownMenuItem<int>(
+                  value: index,
+                  child: Text(
+                    _pageLabel(pages[index], index),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          '${selectedIndex + 1} / ${pages.length}',
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant),
+        ),
+      ],
     );
   }
 
@@ -493,7 +513,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
         key: PageStorageKey<String>(
           'reader-${page.section.id}-${page.sourcePage ?? index}',
         ),
-        padding: EdgeInsets.fromLTRB(20, 8, 20, _audioBottomPadding),
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           if (page.showSectionHeader) _buildSectionHeader(page.section),
@@ -721,12 +741,7 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   Widget _buildEmpty() {
     return Center(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          24,
-          24,
-          24,
-          _audioController == null ? 24 : _audioBottomPadding,
-        ),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -762,13 +777,6 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
         ),
       ),
     );
-  }
-
-  double get _audioBottomPadding {
-    if (_audioController == null) {
-      return 28;
-    }
-    return _audioPlayerMinimized ? 96 : 176;
   }
 
   String _roleLabel(String role) {
