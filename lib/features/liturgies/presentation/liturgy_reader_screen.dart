@@ -509,12 +509,8 @@ class _LiturgyReaderScreenState extends State<LiturgyReaderScreen> {
   Widget _buildBookPage(_ReaderPage page, int index) {
     return RefreshIndicator(
       onRefresh: _refreshContent,
-      child: ListView(
-        key: PageStorageKey<String>(
-          'reader-${page.section.id}-${page.sourcePage ?? index}',
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-        physics: const AlwaysScrollableScrollPhysics(),
+      child: _ScrollablePage(
+        storageKey: 'reader-${page.section.id}-${page.sourcePage ?? index}',
         children: [
           if (page.showSectionHeader) _buildSectionHeader(page.section),
           for (final verse in page.verses) _buildVerse(verse),
@@ -832,4 +828,56 @@ final class _ReaderPage {
   final int? sourcePage;
   final bool showSectionHeader;
   final List<Verse> verses;
+}
+
+/// One page of the book, scrolled vertically under a scrollbar that stays
+/// visible. A page holds more than a screenful, so the reader needs to see how
+/// far down the page they are, not only which page they are on.
+class _ScrollablePage extends StatefulWidget {
+  const _ScrollablePage({required this.storageKey, required this.children});
+
+  final String storageKey;
+  final List<Widget> children;
+
+  @override
+  State<_ScrollablePage> createState() => _ScrollablePageState();
+}
+
+class _ScrollablePageState extends State<_ScrollablePage> {
+  late final ScrollController _controller = ScrollController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScrollbarTheme(
+      data: ScrollbarThemeData(
+        thumbColor: WidgetStatePropertyAll(
+          AppTheme.liturgicalGold.withValues(alpha: 0.75),
+        ),
+        trackColor: WidgetStatePropertyAll(
+          AppTheme.liturgicalGold.withValues(alpha: 0.16),
+        ),
+        trackBorderColor: const WidgetStatePropertyAll(Colors.transparent),
+        thickness: const WidgetStatePropertyAll(5),
+        radius: const Radius.circular(99),
+      ),
+      child: Scrollbar(
+        controller: _controller,
+        thumbVisibility: true,
+        trackVisibility: true,
+        child: ListView(
+          key: PageStorageKey<String>(widget.storageKey),
+          controller: _controller,
+          padding: const EdgeInsets.fromLTRB(20, 8, 26, 28),
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: widget.children,
+        ),
+      ),
+    );
+  }
 }
